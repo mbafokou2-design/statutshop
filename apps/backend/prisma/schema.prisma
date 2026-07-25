@@ -34,6 +34,7 @@ model Product {
   id             String   @id @default(uuid())
   vendeurId      String   @map("vendeur_id")
   title          String
+  slug           String
   description    String?
   priceSelling   Decimal  @map("price_selling") @db.Decimal(12, 2)
   priceWholesale Decimal  @map("price_wholesale") @db.Decimal(12, 2)
@@ -46,6 +47,7 @@ model Product {
   vendeur    User        @relation(fields: [vendeurId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
 
+  @@unique([vendeurId, slug])
   @@index([vendeurId])
   @@map("products")
 }
@@ -86,6 +88,7 @@ model OrderItem {
 model OtpCode {
   id        String   @id @default(uuid())
   phone     String
+  channel   String   @default("sms")
   codeHash  String   @map("code_hash")
   expiresAt DateTime @map("expires_at")
   attempts  Int      @default(0)
@@ -93,4 +96,26 @@ model OtpCode {
 
   @@index([phone])
   @@map("otp_codes")
+}
+
+model WhatsAppSession {
+  id          String   @id @default(uuid())
+  vendeurId   String   @unique @map("vendeur_id")
+  sessionData String   @map("session_data") @db.Text
+  isConnected Boolean  @default(false) @map("is_connected")
+  phoneNumber String?  @map("phone_number")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("whatsapp_sessions")
+}
+
+model TelegramLink {
+  id        String   @id @default(uuid())
+  phone     String   @unique
+  chatId    String   @map("chat_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+
+  @@map("telegram_links")
 }

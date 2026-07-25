@@ -1,27 +1,15 @@
 import argon2 from 'argon2';
 import { prisma } from '../lib/prisma';
-import { sendWhatsAppOtp } from './whatsapp.service';
+import { sendSmsOtp } from './firebaseSms.service';
+import { sendTelegramOtp } from './telegramBot.service';
 
 const OTP_EXPIRY_MINUTES = 5;
 const MAX_ATTEMPTS = 5;
 
+export type OtpChannel = 'sms' | 'telegram';
+
 function generateSixDigitCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-export async function requestOtp(phone: string): Promise<void> {
-  const code = generateSixDigitCode();
-  const codeHash = await argon2.hash(code);
-  const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
-
-  // Supprime les anciens OTP non utilisés pour ce numéro
-  await prisma.otpCode.deleteMany({ where: { phone } });
-
-  await prisma.otpCode.create({
-    data: { phone, codeHash, expiresAt },
-  });
-
-  await sendWhatsAppOtp(phone, code);
 }
 
 export async function verifyOtp(phone: string, code: string): Promise<boolean> {
@@ -50,7 +38,30 @@ export async function verifyOtp(phone: string, code: string): Promise<boolean> {
     return false;
   }
 
-  // OTP valide -> on le supprime (usage unique)
   await prisma.otpCode.delete({ where: { id: otpRecord.id } });
   return true;
+}
+
+function formatPhoneNumber(phone: string): string {
+  const cleaned = phone.replace(/\s+/g, '');
+  return cleaned.startsWith('+') ? cleaned : `+${cleaned}`;
+}
+
+export async function requestOtp(rawPhone: string, channel: OtpChannel): Promise<void> {
+  const phone = formatPhoneNumber(rawPhone);
+  const code = generateSixDigitCode();
+  const codeHash = await argon2.hash(code);
+  const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+  await prisma.otpCode.deleteMany({ where: { phone } });
+
+  await prisma.otpCode.create({
+    data: { phone, channel, codeHash, expiresAt },
+  });
+
+  if (channel === 'telegram') {
+    await sendTelegramOtp(phone, code);
+  } else {
+    await sendSmsOtp(phone, code);
+  }
 }

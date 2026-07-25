@@ -5,13 +5,14 @@ import {
   handleRegister,
   handleLogin,
   handleLogout,
+  handleResetPassword,
 } from '../controllers/auth.controller';
-import { otpRateLimiter } from '../middlewares/rateLimit.middleware';
 
 const router = Router();
 
-router.post('/request-otp', otpRateLimiter, handleRequestOtp);
+router.post('/request-otp', handleRequestOtp);
 router.post('/verify-otp', handleVerifyOtp);
+router.post('/reset-password', handleResetPassword);
 router.post('/register', handleRegister);
 router.post('/login', handleLogin);
 router.post('/logout', handleLogout);

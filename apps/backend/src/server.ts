@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
+import './services/telegramBot.service';
+import publicShopRoutes from './routes/publicShop.routes';
 
 dotenv.config();
 
@@ -19,6 +21,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.use('/api/v1/shop', publicShopRoutes);
 
 app.get('/api/v1/health', (req, res) => {
   res.json({ status: 'ok', message: 'StatutShop API is running' });
