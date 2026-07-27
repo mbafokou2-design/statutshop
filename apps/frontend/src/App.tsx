@@ -6,6 +6,9 @@ import { DashboardHome } from './pages/DashboardHome';
 import { ProductsPage } from './pages/ProductsPage';
 import { PublicStorePage } from './pages/shop/PublicStorePage';
 import { SingleProductPage } from './pages/shop/SingleProductPage';
+import { SettingsPage } from './pages/SettingsPage';
+import { DeliveryPartnersPage } from './pages/DeliveryPartnersPage';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 function App() {
   return (
@@ -15,9 +18,11 @@ function App() {
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/auth" element={<AuthPages />} />
 
-          <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
             <Route index element={<DashboardHome />} />
             <Route path="products" element={<ProductsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="delivery-partners" element={<DeliveryPartnersPage />} />
           </Route>
 
           {/* Route publique pour voir la boutique */}

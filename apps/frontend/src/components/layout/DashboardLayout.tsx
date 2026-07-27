@@ -9,7 +9,7 @@ import { OfflineState } from '../ui/OfflineState';
 import { Home, Package, ShoppingBag, Wallet, Settings, LogOut } from 'lucide-react';
 
 function getInitials(name?: string): string {
-  if (!name) return '??';
+  if (!name || !name.trim()) return 'SB';
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -24,7 +24,7 @@ const navItems = [
 ];
 
 export const DashboardLayout: React.FC = () => {
-  const { user, setUser } = useAuth();
+  const { user, setUser, isRestoring } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { isOnline, isChecking, retry } = useBackendStatus();
@@ -44,8 +44,8 @@ export const DashboardLayout: React.FC = () => {
     }
   };
 
-  // Vérification en cours -> spinner plein écran
-  if (isOnline === null) {
+  // Restauration de la session ou vérification backend en cours -> spinner plein écran
+  if (isRestoring || isOnline === null) {
     return <LoadingSpinner label="Connexion à StatutShop..." />;
   }
 

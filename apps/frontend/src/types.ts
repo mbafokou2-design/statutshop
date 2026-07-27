@@ -61,3 +61,31 @@ export interface PublicOrderPayload {
   deliveryAddress: string;
   quantity: number;
 }
+
+export type VehicleType = 'MOTO' | 'CAR' | 'BICYCLE' | 'WALKING';
+
+export const VEHICLE_LABELS: Record<VehicleType, string> = {
+  MOTO: 'Moto',
+  CAR: 'Voiture',
+  BICYCLE: 'Vélo',
+  WALKING: 'À pied',
+};
+
+export interface DeliveryPartner {
+  id: string;
+  fullName: string;
+  whatsappNum: string;
+  avatarUrl: string | null;
+  city: string;
+  coveredZones: string[];
+  vehicleType: VehicleType;
+  basePrice: string | null;
+  rating: number;
+  totalDeliveries: number;
+  isVerified: boolean;
+}
+
+export interface TelegramStatus {
+  linked: boolean;
+  botUsername: string | null;
+}

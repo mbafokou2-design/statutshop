@@ -3,12 +3,14 @@ import argon2 from 'argon2';
 import { prisma } from '../lib/prisma';
 import { requestOtp, verifyOtp } from '../services/otp.service';
 import { signToken } from '../services/jwt.service';
+import { AuthRequest } from '../middlewares/auth.middleware';
 import {
   requestOtpSchema,
   verifyOtpSchema,
   loginSchema,
   registerSchema,
   resetPasswordSchema,
+  changePasswordSchema,
 } from '../validators/auth.validator';
 
 const COOKIE_OPTIONS = {
@@ -258,6 +260,7 @@ export async function handleRegister(req: Request, res: Response) {
     user: { id: user.id, phone: user.phone, storeName: user.storeName, storeSlug: user.storeSlug },
   });
 }
+
 // 🟢 5. DÉCONNEXION
 export async function handleLogout(req: Request, res: Response) {
   res.clearCookie('token', {
@@ -266,6 +269,65 @@ export async function handleLogout(req: Request, res: Response) {
     secure: process.env.NODE_ENV === 'production',
   });
   return res.json({ message: 'Déconnexion réussie' });
+}
+
+// 🟢 6. CHANGEMENT DE MOT DE PASSE (Connecté)
+export async function handleChangePassword(req: AuthRequest, res: Response) {
+  const parsed = changePasswordSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.errors[0].message });
+  }
+
+  const { currentPassword, newPassword } = parsed.data;
+  const userId = req.user!.userId;
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    return res.status(404).json({ error: 'Utilisateur introuvable' });
+  }
+
+  // Si l'utilisateur a déjà un mot de passe, on exige l'ancien pour le changer
+  if (user.passwordHash) {
+    if (!currentPassword) {
+      return res.status(400).json({ error: 'Mot de passe actuel requis' });
+    }
+    const isValid = await argon2.verify(user.passwordHash, currentPassword);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Mot de passe actuel incorrect' });
+    }
+  }
+
+  const newHash = await argon2.hash(newPassword);
+  await prisma.user.update({ where: { id: userId }, data: { passwordHash: newHash } });
+
+  return res.json({ message: 'Mot de passe mis à jour avec succès' });
+}
+
+// 🟢 7. STATUT LIAISON TELEGRAM
+export async function getTelegramStatus(req: AuthRequest, res: Response) {
+  const phone = req.user!.phone;
+
+  const link = await prisma.telegramLink.findUnique({ where: { phone } });
+
+  return res.json({
+    linked: Boolean(link),
+    botUsername: process.env.TELEGRAM_BOT_USERNAME || null,
+  });
+}
+
+export async function getMe(req: AuthRequest, res: Response) {
+  const userId = req.user!.userId;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, phone: true, storeName: true, storeSlug: true },
+  });
+
+  if (!user) {
+    return res.status(404).json({ error: 'Utilisateur introuvable' });
+  }
+
+  return res.json({ user });
 }
 
 

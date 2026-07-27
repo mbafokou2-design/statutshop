@@ -30,6 +30,7 @@ model User {
   updatedAt           DateTime @updatedAt @map("updated_at")
 
   products Product[]
+  deliveryRatings DeliveryPartnerRating[]
   orders   Order[]
 
   @@map("users")
@@ -162,7 +163,22 @@ model DeliveryPartner {
   isActive        Boolean     @default(true) @map("is_active")
   createdAt       DateTime    @default(now()) @map("created_at")
   updatedAt       DateTime    @updatedAt @map("updated_at")
+  ratings DeliveryPartnerRating[]
 
   @@index([city])
   @@map("delivery_partners")
+}
+
+model DeliveryPartnerRating {
+  id        String   @id @default(uuid())
+  partnerId String   @map("partner_id")
+  vendeurId String   @map("vendeur_id")
+  rating    Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  partner DeliveryPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  vendeur User            @relation(fields: [vendeurId], references: [id], onDelete: Cascade)
+
+  @@unique([partnerId, vendeurId])
+  @@map("delivery_partner_ratings")
 }

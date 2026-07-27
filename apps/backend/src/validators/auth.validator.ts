@@ -34,3 +34,7 @@ export const resetPasswordSchema = z.object({
   code: z.string().length(6, 'Le code OTP doit contenir 6 chiffres'),
   newPassword: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
 });
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(6, 'Le nouveau mot de passe doit contenir au moins 6 caractères'),
+});
