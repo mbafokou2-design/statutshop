@@ -1,12 +1,17 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 
+const vendeurPublicSelect = {
+  id: true, storeName: true, storeSlug: true, whatsappBusinessNum: true,
+  city: true, neighborhood: true, logoUrl: true, coverUrl: true, description: true,
+};
+
 export async function getPublicStore(req: Request, res: Response) {
   const { storeSlug } = req.params;
 
   const vendeur = await prisma.user.findUnique({
     where: { storeSlug },
-    select: { id: true, storeName: true, storeSlug: true, whatsappBusinessNum: true },
+    select: vendeurPublicSelect,
   });
 
   if (!vendeur) {
@@ -24,7 +29,7 @@ export async function getPublicStore(req: Request, res: Response) {
 export async function getPublicProduct(req: Request, res: Response) {
   const { storeSlug, productSlug } = req.params;
 
-  const vendeur = await prisma.user.findUnique({ where: { storeSlug } });
+  const vendeur = await prisma.user.findUnique({ where: { storeSlug }, select: vendeurPublicSelect });
   if (!vendeur) {
     return res.status(404).json({ error: 'Boutique introuvable' });
   }

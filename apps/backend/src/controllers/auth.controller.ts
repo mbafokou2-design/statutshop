@@ -123,6 +123,10 @@ export async function handleVerifyOtp(req: Request, res: Response) {
         passwordHash,
         storeName: finalStoreName,
         storeSlug: slug,
+        whatsappBusinessNum: phone,
+        logoUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1784994033/How_i_grew_my_business_using_Shopify_j2hs8v.jpg',
+        coverUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1784994034/t%C3%A9l%C3%A9charger_zzeoxu.jpg',
+        description: 'Bienvenue dans notre boutique ! Découvrez nos produits de qualité.',
       },
     });
   }
@@ -234,7 +238,16 @@ export async function handleRegister(req: Request, res: Response) {
   }
 
   const user = await prisma.user.create({
-    data: { phone, passwordHash, storeName, storeSlug: slug },
+    data: {
+      phone,
+      passwordHash,
+      storeName,
+      storeSlug: slug,
+      whatsappBusinessNum: phone,
+      logoUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1784994033/How_i_grew_my_business_using_Shopify_j2hs8v.jpg',
+      coverUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1784994034/t%C3%A9l%C3%A9charger_zzeoxu.jpg',
+      description: 'Bienvenue dans notre boutique ! Découvrez nos produits de qualité.',
+    },
   });
 
   const token = signToken({ userId: user.id, phone: user.phone });
@@ -245,9 +258,17 @@ export async function handleRegister(req: Request, res: Response) {
     user: { id: user.id, phone: user.phone, storeName: user.storeName, storeSlug: user.storeSlug },
   });
 }
-
 // 🟢 5. DÉCONNEXION
 export async function handleLogout(req: Request, res: Response) {
-  res.clearCookie('token', COOKIE_OPTIONS);
+  res.clearCookie('token', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  });
   return res.json({ message: 'Déconnexion réussie' });
 }
+
+
+
+
+

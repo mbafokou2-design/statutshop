@@ -21,6 +21,11 @@ model User {
   storeName           String   @map("store_name")
   storeSlug           String   @unique @map("store_slug")
   whatsappBusinessNum String?  @map("whatsapp_business_num")
+  city                String?  @default("Douala")
+  neighborhood        String?  @default("Centre-ville")
+  logoUrl             String?  @map("logo_url")
+  coverUrl            String?  @map("cover_url")
+  description         String?  @db.Text
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 
@@ -31,18 +36,20 @@ model User {
 }
 
 model Product {
-  id             String   @id @default(uuid())
-  vendeurId      String   @map("vendeur_id")
+  id             String          @id @default(uuid())
+  vendeurId      String          @map("vendeur_id")
   title          String
   slug           String
   description    String?
-  priceSelling   Decimal  @map("price_selling") @db.Decimal(12, 2)
-  priceWholesale Decimal  @map("price_wholesale") @db.Decimal(12, 2)
-  stockQty       Int      @default(0) @map("stock_qty")
-  imageUrl       String?  @map("image_url")
-  isActive       Boolean  @default(true) @map("is_active")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  category       ProductCategory
+  priceSelling   Decimal         @map("price_selling") @db.Decimal(12, 2)
+  priceWholesale Decimal         @map("price_wholesale") @db.Decimal(12, 2)
+  stockQty       Int             @default(0) @map("stock_qty")
+  imageUrl       String?         @map("image_url")
+  isAvailable    Boolean         @default(true) @map("is_available")
+  isActive       Boolean         @default(true) @map("is_active")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
 
   vendeur    User        @relation(fields: [vendeurId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
@@ -52,16 +59,25 @@ model Product {
   @@map("products")
 }
 
+enum ProductCategory {
+  VETEMENTS
+  SACS_ACCESSOIRES
+  CHAUSSURES
+  BEAUTE_CHEVEUX
+  HIGH_TECH_GADGETS
+}
+
 model Order {
-  id            String      @id @default(uuid())
-  vendeurId     String      @map("vendeur_id")
-  customerName  String      @map("customer_name")
-  customerPhone String      @map("customer_phone")
-  deliveryFee   Decimal     @default(0) @map("delivery_fee") @db.Decimal(12, 2)
-  totalAmount   Decimal     @map("total_amount") @db.Decimal(12, 2)
-  status        OrderStatus @default(PENDING)
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
+  id              String      @id @default(uuid())
+  vendeurId       String      @map("vendeur_id")
+  customerName    String      @map("customer_name")
+  customerPhone   String      @map("customer_phone")
+  deliveryAddress String?     @map("delivery_address")
+  deliveryFee     Decimal     @default(0) @map("delivery_fee") @db.Decimal(12, 2)
+  totalAmount     Decimal     @map("total_amount") @db.Decimal(12, 2)
+  status          OrderStatus @default(PENDING)
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
 
   vendeur User        @relation(fields: [vendeurId], references: [id], onDelete: Cascade)
   items   OrderItem[]
@@ -118,4 +134,35 @@ model TelegramLink {
 
 
   @@map("telegram_links")
+}
+
+
+enum VehicleType {
+  MOTO
+  CAR
+  BICYCLE
+  WALKING
+}
+
+model DeliveryPartner {
+  id              String      @id @default(uuid())
+  fullName        String      @map("full_name")
+  phone           String      @unique
+  whatsappNum     String      @map("whatsapp_num")
+  avatarUrl       String?     @map("avatar_url")
+  cniNumber       String      @map("cni_number")
+  cniPhotoUrl     String      @map("cni_photo_url")
+  city            String
+  coveredZones    String[]    @map("covered_zones")
+  vehicleType     VehicleType @map("vehicle_type")
+  basePrice       String?     @map("base_price")
+  rating          Float       @default(5.0)
+  totalDeliveries Int         @default(0) @map("total_deliveries")
+  isVerified      Boolean     @default(false) @map("is_verified")
+  isActive        Boolean     @default(true) @map("is_active")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@index([city])
+  @@map("delivery_partners")
 }
