@@ -9,6 +9,7 @@ import { SingleProductPage } from './pages/shop/SingleProductPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { DeliveryPartnersPage } from './pages/DeliveryPartnersPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { OrdersPage } from './pages/OrdersPage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
             <Route index element={<DashboardHome />} />
             <Route path="products" element={<ProductsPage />} />
+            <Route path="orders" element={<OrdersPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="delivery-partners" element={<DeliveryPartnersPage />} />
           </Route>

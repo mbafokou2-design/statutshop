@@ -89,3 +89,29 @@ export interface TelegramStatus {
   linked: boolean;
   botUsername: string | null;
 }
+
+export type BackendOrderStatus = 'PENDING' | 'CONFIRMED' | 'DELIVERED' | 'CANCELLED';
+
+export interface OrderItemDisplay {
+  id: string;
+  quantity: number;
+  unitPrice: number;
+  product: {
+    id: string;
+    title: string;
+    imageUrl: string | null;
+    priceWholesale: number;
+  };
+}
+
+export interface OrderDisplay {
+  id: string;
+  customerName: string;
+  customerPhone: string;
+  deliveryAddress: string | null;
+  deliveryFee: number;
+  totalAmount: number;
+  status: BackendOrderStatus;
+  createdAt: string;
+  items: OrderItemDisplay[];
+}

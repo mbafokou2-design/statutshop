@@ -12,6 +12,7 @@
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
+    "@google-analytics/data": "^6.1.0",
     "@hapi/boom": "^10.0.1",
     "@prisma/client": "^5.19.1",
     "@whiskeysockets/baileys": "^7.0.0-rc13",

@@ -4,11 +4,13 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
-import productRoutes from './routes/product.routes'; // <-- 1. Import des routes produits
+import productRoutes from './routes/product.routes';
 import publicShopRoutes from './routes/publicShop.routes';
 import './services/telegramBot.service';
 import settingsRoutes from './routes/settings.routes';
 import deliveryPartnerRoutes from './routes/deliveryPartner.routes';
+import analyticsRoutes from './routes/analytics.routes';
+import orderRoutes from './routes/order.routes';
 
 dotenv.config();
 
@@ -37,6 +39,8 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/settings', settingsRoutes);
 app.use('/api/v1/delivery-partners', deliveryPartnerRoutes);
+app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/orders', orderRoutes);
 
 app.get('/api/v1/health', (req, res) => {
   res.json({ status: 'ok', message: 'StatutShop API is running' });

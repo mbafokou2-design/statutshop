@@ -8,6 +8,8 @@ import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { OfflineState } from '../../components/ui/OfflineState';
 import type { ToastMessage } from '../../components/ToastContainer';
 import { ToastContainer } from '../../components/ToastContainer';
+import { useAuth } from '../../context/AuthContext';
+import { api } from '../../lib/api';
 import {
   Store, MessageSquare, MapPin, User, Phone, Truck, ShieldCheck, Sparkles, ArrowLeft, PackageX
 } from 'lucide-react';
@@ -21,6 +23,7 @@ const DELIVERY_OPTIONS = [
 export const SingleProductPage: React.FC = () => {
   const { storeSlug, productSlug } = useParams<{ storeSlug: string; productSlug: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [vendeur, setVendeur] = useState<StoreSettings | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -55,6 +58,31 @@ export const SingleProductPage: React.FC = () => {
   };
 
   useEffect(() => { load(); }, [storeSlug, productSlug]);
+
+  // Enregistrement de la visite de boutique
+// Enregistrement de la visite avec filtres anti-spam
+  useEffect(() => {
+    if (!storeSlug) return;
+
+    // 1. Ne pas compter si le propriétaire consulte sa propre boutique
+    if (user && user.storeSlug === storeSlug) {
+      return;
+    }
+
+    // 2. Vérification LocalStorage
+    const storageKey = `visited_shop_${storeSlug}`;
+    const hasVisited = localStorage.getItem(storageKey);
+
+    if (!hasVisited) {
+      // ⚠️ DÉFINIR IMMÉDIATEMENT le localStorage (Synchrone) pour bloquer le 2ème execution de React StrictMode
+      localStorage.setItem(storageKey, new Date().toISOString());
+
+      api.post(`/analytics/shop/${storeSlug}/visit`).catch(() => {
+        // En cas d'erreur de réseau, on libère le localStorage
+        localStorage.removeItem(storageKey);
+      });
+    }
+  }, [storeSlug, user]);
 
   const handleOrderWhatsApp = async (e: React.FormEvent) => {
     e.preventDefault();

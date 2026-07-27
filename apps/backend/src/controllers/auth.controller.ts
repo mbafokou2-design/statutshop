@@ -1,3 +1,4 @@
+
 import { Request, Response } from 'express';
 import argon2 from 'argon2';
 import { prisma } from '../lib/prisma';
@@ -44,17 +45,14 @@ export async function handleRequestOtp(req: Request, res: Response) {
   const { channel, mode } = req.body;
   const phone = formatPhoneNumber(parsed.data.phone);
 
-  // 🔴 Vérification explicite de l'existence du compte en BDD
   const existingUser = await prisma.user.findUnique({ where: { phone } });
 
-  // CAS 1: Inscription alors que le compte existe déjà
   if (mode === 'register' && existingUser) {
     return res.status(409).json({ 
       error: 'Un compte StatutShop existe déjà avec ce numéro. Veuillez vous connecter.' 
     });
   }
 
-  // CAS 2: Connexion ou Réinitialisation alors que le compte N'EXISTE PAS en BDD
   if ((mode === 'login' || mode === 'reset_password') && !existingUser) {
     return res.status(404).json({ 
       error: "Aucun compte StatutShop trouvé pour ce numéro. Veuillez d'abord créer un compte." 
@@ -65,7 +63,6 @@ export async function handleRequestOtp(req: Request, res: Response) {
     await requestOtp(phone, channel);
     return res.json({ message: 'Code OTP envoyé avec succès' });
   } catch (err: any) {
-    // Si le numéro n'est pas encore démarré sur le bot Telegram
     if (channel === 'telegram' && err.message?.includes("pas encore lié")) {
       const botUsername = process.env.TELEGRAM_BOT_USERNAME || 'StatutShopBot';
       const cleanPhone = phone.replace('+', '');
@@ -81,7 +78,7 @@ export async function handleRequestOtp(req: Request, res: Response) {
   }
 }
 
-// 🟢 2. VÉRIFICATION OTP ET CRÉATION DE COMPTE (Inscription)
+// 🟢 2. VÉRIFICATION OTP ET CRÉATION DE COMPTE
 export async function handleVerifyOtp(req: Request, res: Response) {
   const parsed = verifyOtpSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -102,7 +99,6 @@ export async function handleVerifyOtp(req: Request, res: Response) {
     return res.status(409).json({ error: 'Ce compte existe déjà. Veuillez vous connecter.' });
   }
 
-  // Création de compte lors de l'inscription
   if (!user) {
     if (!password) {
       return res.status(400).json({ error: 'Le mot de passe est obligatoire pour créer un compte.' });
@@ -138,11 +134,17 @@ export async function handleVerifyOtp(req: Request, res: Response) {
 
   return res.json({
     message: 'Connexion réussie',
-    user: { id: user.id, phone: user.phone, storeName: user.storeName, storeSlug: user.storeSlug },
+    user: { 
+      id: user.id, 
+      phone: user.phone, 
+      storeName: user.storeName, 
+      storeSlug: user.storeSlug,
+      visitCount: user.visitCount || 0 // 👈 AJOUTÉ
+    },
   });
 }
 
-// 🟢 3. RÉINITIALISATION DU MOT DE PASSE (Reset Password)
+// 🟢 3. RÉINITIALISATION DU MOT DE PASSE
 export async function handleResetPassword(req: Request, res: Response) {
   const parsed = resetPasswordSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -152,26 +154,22 @@ export async function handleResetPassword(req: Request, res: Response) {
   const { code, newPassword } = parsed.data;
   const phone = formatPhoneNumber(parsed.data.phone);
 
-  // 1. Vérifier que l'utilisateur existe
   const user = await prisma.user.findUnique({ where: { phone } });
   if (!user) {
     return res.status(404).json({ error: "Aucun compte trouvé avec ce numéro." });
   }
 
-  // 2. Valider l'OTP
   const isValid = await verifyOtp(phone, code);
   if (!isValid) {
     return res.status(401).json({ error: 'Code OTP invalide ou expiré' });
   }
 
-  // 3. Hasher le nouveau mot de passe et mettre à jour le compte
   const passwordHash = await argon2.hash(newPassword);
   const updatedUser = await prisma.user.update({
     where: { phone },
     data: { passwordHash },
   });
 
-  // 4. Connecter directement l'utilisateur
   const token = signToken({ userId: updatedUser.id, phone: updatedUser.phone });
   res.cookie('token', token, COOKIE_OPTIONS);
 
@@ -181,7 +179,8 @@ export async function handleResetPassword(req: Request, res: Response) {
       id: updatedUser.id, 
       phone: updatedUser.phone, 
       storeName: updatedUser.storeName, 
-      storeSlug: updatedUser.storeSlug 
+      storeSlug: updatedUser.storeSlug,
+      visitCount: updatedUser.visitCount || 0 // 👈 AJOUTÉ
     },
   });
 }
@@ -211,7 +210,13 @@ export async function handleLogin(req: Request, res: Response) {
 
   return res.json({
     message: 'Connexion réussie',
-    user: { id: user.id, phone: user.phone, storeName: user.storeName, storeSlug: user.storeSlug },
+    user: { 
+      id: user.id, 
+      phone: user.phone, 
+      storeName: user.storeName, 
+      storeSlug: user.storeSlug,
+      visitCount: user.visitCount || 0 // 👈 AJOUTÉ
+    },
   });
 }
 
@@ -257,7 +262,13 @@ export async function handleRegister(req: Request, res: Response) {
 
   return res.status(201).json({
     message: 'Compte créé avec succès',
-    user: { id: user.id, phone: user.phone, storeName: user.storeName, storeSlug: user.storeSlug },
+    user: { 
+      id: user.id, 
+      phone: user.phone, 
+      storeName: user.storeName, 
+      storeSlug: user.storeSlug,
+      visitCount: user.visitCount || 0 // 👈 AJOUTÉ
+    },
   });
 }
 
@@ -286,7 +297,6 @@ export async function handleChangePassword(req: AuthRequest, res: Response) {
     return res.status(404).json({ error: 'Utilisateur introuvable' });
   }
 
-  // Si l'utilisateur a déjà un mot de passe, on exige l'ancien pour le changer
   if (user.passwordHash) {
     if (!currentPassword) {
       return res.status(400).json({ error: 'Mot de passe actuel requis' });
@@ -315,12 +325,19 @@ export async function getTelegramStatus(req: AuthRequest, res: Response) {
   });
 }
 
+// 🟢 8. GET ME (Récupération du profil actuel)
 export async function getMe(req: AuthRequest, res: Response) {
   const userId = req.user!.userId;
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, phone: true, storeName: true, storeSlug: true },
+    select: { 
+      id: true, 
+      phone: true, 
+      storeName: true, 
+      storeSlug: true, 
+      visitCount: true // 👈 SÉLECTIONNÉ DEPUIS PRISMA
+    },
   });
 
   if (!user) {
@@ -329,8 +346,5 @@ export async function getMe(req: AuthRequest, res: Response) {
 
   return res.json({ user });
 }
-
-
-
 
 
