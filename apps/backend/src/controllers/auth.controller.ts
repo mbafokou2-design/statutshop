@@ -42,7 +42,8 @@ export async function handleRequestOtp(req: Request, res: Response) {
     return res.status(400).json({ error: parsed.error.errors[0].message });
   }
 
-  const { channel, mode } = req.body;
+  // 👈 WhatsApp par défaut si 'channel' n'est pas envoyé
+  const { channel = 'whatsapp', mode } = req.body; 
   const phone = formatPhoneNumber(parsed.data.phone);
 
   const existingUser = await prisma.user.findUnique({ where: { phone } });
@@ -61,7 +62,7 @@ export async function handleRequestOtp(req: Request, res: Response) {
 
   try {
     await requestOtp(phone, channel);
-    return res.json({ message: 'Code OTP envoyé avec succès' });
+    return res.json({ message: 'Code OTP envoyé sur WhatsApp avec succès' });
   } catch (err: any) {
     if (channel === 'telegram' && err.message?.includes("pas encore lié")) {
       const botUsername = process.env.TELEGRAM_BOT_USERNAME || 'StatutShopBot';

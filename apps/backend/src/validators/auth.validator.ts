@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 export const requestOtpSchema = z.object({
   phone: z.string().min(8, 'Numéro de téléphone invalide'),
-  channel: z.enum(['telegram', 'sms']),
+  // 🟢 'sms' a été remplacé par 'whatsapp'
+  channel: z.enum(['telegram', 'whatsapp']),
   mode: z.enum(['register', 'login', 'reset_password']),
   storeName: z.string().optional(),
   password: z.string().optional(),
@@ -16,13 +17,11 @@ export const verifyOtpSchema = z.object({
   password: z.string().optional(),
 });
 
-// 🟢 Ajoute cet export si absente
 export const loginSchema = z.object({
   phone: z.string().min(8, 'Numéro de téléphone invalide'),
   password: z.string().min(1, 'Le mot de passe est requis'),
 });
 
-// 🟢 Ajoute cet export si absente
 export const registerSchema = z.object({
   phone: z.string().min(8, 'Numéro de téléphone invalide'),
   password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
@@ -34,6 +33,7 @@ export const resetPasswordSchema = z.object({
   code: z.string().length(6, 'Le code OTP doit contenir 6 chiffres'),
   newPassword: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
 });
+
 export const changePasswordSchema = z.object({
   currentPassword: z.string().optional(),
   newPassword: z.string().min(6, 'Le nouveau mot de passe doit contenir au moins 6 caractères'),

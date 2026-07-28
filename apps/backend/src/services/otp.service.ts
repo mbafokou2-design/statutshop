@@ -1,12 +1,13 @@
 import argon2 from 'argon2';
 import { prisma } from '../lib/prisma';
-import { sendSmsOtp } from './firebaseSms.service';
+import { sendWhatsAppOtp } from './whatsapp.service';
 import { sendTelegramOtp } from './telegramBot.service';
 
 const OTP_EXPIRY_MINUTES = 5;
-const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = 1000;
 
-export type OtpChannel = 'sms' | 'telegram';
+// 1. On remplace 'sms' par 'whatsapp' dans le type
+export type OtpChannel = 'whatsapp' | 'telegram';
 
 function generateSixDigitCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -59,9 +60,11 @@ export async function requestOtp(rawPhone: string, channel: OtpChannel): Promise
     data: { phone, channel, codeHash, expiresAt },
   });
 
+  // 2. Routage dynamique selon le canal choisi
   if (channel === 'telegram') {
     await sendTelegramOtp(phone, code);
   } else {
-    await sendSmsOtp(phone, code);
+    // Par défaut / 'whatsapp' : Envoi via Zindua
+    await sendWhatsAppOtp(phone, code);
   }
 }

@@ -11,6 +11,7 @@ import { ToastContainer } from '../components/ToastContainer';
 import type { ToastMessage } from '../components/ToastContainer';
 import { LogoutModal } from '../components/ui/LogoutModal';
 import { ChangePasswordModal } from '../components/settings/ChangePasswordModal';
+import { ConnectWhatsAppSection } from '../components/settings/ConnectWhatsAppSection';
 
 import {
   Store,
@@ -269,6 +270,12 @@ export const SettingsPage: React.FC = () => {
           </button>
         </div>
       </form>
+
+      {/* Intégration du composant WhatsApp */}
+      <ConnectWhatsAppSection
+        onSuccess={(msg) => pushToast('success', msg)}
+        onError={(msg) => pushToast('error', msg)}
+      />
 
       {/* Compte */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">

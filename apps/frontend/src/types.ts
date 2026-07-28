@@ -1,9 +1,8 @@
 export type AuthScreen = 'login' | 'register';
-export type OtpChannel = 'telegram' | 'sms';
+// 🟢 Remplacement de 'sms' par 'whatsapp'
+export type OtpChannel = 'telegram' | 'whatsapp';
 
-export interface StoreSettings {
-  storeName: string;
-}
+// ❌ 'StoreSettings' (version incomplète) supprimé d'ici pour éviter les conflits de types
 
 export interface User {
   id: string;
@@ -42,6 +41,7 @@ export interface Product {
   createdAt: string;
 }
 
+// 🟢 Version unique et complète de StoreSettings
 export interface StoreSettings {
   id: string;
   storeName: string;
@@ -114,4 +114,38 @@ export interface OrderDisplay {
   status: BackendOrderStatus;
   createdAt: string;
   items: OrderItemDisplay[];
+}
+
+export type FinancePeriod = 'today' | 'week' | 'month';
+
+export interface FinanceLedgerEntry {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  productTitle: string;
+  totalAmount: number;
+  wholesaleCost: number;
+  deliveryFee: number;
+  netProfit: number;
+  createdAt: string;
+}
+
+export interface FinanceSummary {
+  period: FinancePeriod;
+  totalCA: number;
+  totalWholesale: number;
+  totalDeliveryFees: number;
+  netProfitInPocket: number;
+  profitMarginPercent: number;
+  deliveredOrdersCount: number;
+  ledger: FinanceLedgerEntry[];
+}
+
+export interface WhatsAppStatus {
+  connected: boolean;
+  phoneNumber: string | null;
+}
+
+export interface WhatsAppConnectResponse {
+  pairingCode: string | null;
 }

@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   Sparkles,
   Send,
-  Smartphone,
   ExternalLink,
   ChevronLeft,
   RefreshCw,
@@ -26,7 +25,6 @@ import {
 type RegisterStep = 'form' | 'telegram_link' | 'otp_verify';
 type ResetStep = 'request' | 'verify';
 
-// On étend le type AuthScreen localement si pas encore à jour dans tes types global
 type ScreenType = AuthScreen | 'reset_password';
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'StatutShopBot';
@@ -36,7 +34,8 @@ export const AuthPages: React.FC = () => {
   const { setUser } = useAuth();
 
   const [screen, setScreen] = useState<ScreenType>('login');
-  const [otpChannel, setOtpChannel] = useState<OtpChannel>('telegram');
+  // 🟢 WhatsApp par défaut
+  const [otpChannel, setOtpChannel] = useState<OtpChannel>('whatsapp');
 
   // States Formulaires
   const [phone, setPhone] = useState('');
@@ -75,7 +74,7 @@ export const AuthPages: React.FC = () => {
     setNewPassword('');
   };
 
-  // --- LOGIQUE DE CONNEXION ---
+// --- LOGIQUE DE CONNEXION ---
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setToastError(null);
@@ -348,12 +347,34 @@ export const AuthPages: React.FC = () => {
                     Recevoir le code de réinitialisation via :
                   </label>
                   <div className="grid grid-cols-2 gap-2.5">
+                    {/* WhatsApp */}
+                    <button
+                      type="button"
+                      onClick={() => setOtpChannel('whatsapp')}
+                      className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${otpChannel === 'whatsapp'
+                        ? 'bg-emerald-950/40 border-emerald-500/80 text-white ring-1 ring-emerald-500/30'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                        }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                          <MessageSquare className="w-4 h-4" />
+                        </div>
+                        {otpChannel === 'whatsapp' && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white">WhatsApp</p>
+                        <p className="text-[10px] text-emerald-300/80 mt-0.5">Sur votre application</p>
+                      </div>
+                    </button>
+
+                    {/* Telegram */}
                     <button
                       type="button"
                       onClick={() => setOtpChannel('telegram')}
                       className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${otpChannel === 'telegram'
-                          ? 'bg-sky-950/40 border-sky-500/80 text-white ring-1 ring-sky-500/30'
-                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                        ? 'bg-sky-950/40 border-sky-500/80 text-white ring-1 ring-sky-500/30'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
                         }`}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -365,26 +386,6 @@ export const AuthPages: React.FC = () => {
                       <div>
                         <p className="text-xs font-bold text-white">Telegram</p>
                         <p className="text-[10px] text-sky-300/80 mt-0.5">Sur le Bot</p>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setOtpChannel('sms')}
-                      className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${otpChannel === 'sms'
-                          ? 'bg-emerald-950/40 border-emerald-500/80 text-white ring-1 ring-emerald-500/30'
-                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                        }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                          <Smartphone className="w-4 h-4" />
-                        </div>
-                        {otpChannel === 'sms' && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>}
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white">SMS Direct</p>
-                        <p className="text-[10px] text-emerald-300/80 mt-0.5">Par SMS</p>
                       </div>
                     </button>
                   </div>
@@ -530,45 +531,45 @@ export const AuthPages: React.FC = () => {
                     Canal de réception du code OTP :
                   </label>
                   <div className="grid grid-cols-2 gap-2.5">
-                    {/* Option Telegram (Actif) */}
+                    {/* Option WhatsApp Direct */}
+                    <button
+                      type="button"
+                      onClick={() => setOtpChannel('whatsapp')}
+                      className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${otpChannel === 'whatsapp'
+                        ? 'bg-emerald-950/40 border-emerald-500/80 text-white ring-1 ring-emerald-500/30'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                        }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                          <MessageSquare className="w-4 h-4" />
+                        </div>
+                        {otpChannel === 'whatsapp' && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white">WhatsApp Direct</p>
+                        <p className="text-[10px] text-emerald-300/80 mt-0.5">Instant & Gratuit</p>
+                      </div>
+                    </button>
+
+                    {/* Option Telegram Bot */}
                     <button
                       type="button"
                       onClick={() => setOtpChannel('telegram')}
                       className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${otpChannel === 'telegram'
-                          ? 'bg-sky-950/40 border-sky-500/80 text-white ring-1 ring-sky-500/30'
-                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                        ? 'bg-sky-950/40 border-sky-500/80 text-white ring-1 ring-sky-500/30'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
                         }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
                           <Send className="w-4 h-4" />
                         </div>
-                        <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+                        {otpChannel === 'telegram' && <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>}
                       </div>
                       <div>
                         <p className="text-xs font-bold text-white">Telegram Bot</p>
                         <p className="text-[10px] text-sky-300/80 mt-0.5">Instant & Gratuit</p>
-                      </div>
-                    </button>
-
-                    {/* Option SMS (Désactivée temporairement) */}
-                    <button
-                      type="button"
-                      disabled
-                      onClick={() => triggerToastError("Le service SMS est temporairement indisponible. Veuillez utiliser Telegram.")}
-                      className="p-3 rounded-2xl border border-slate-800 bg-slate-950/50 text-slate-600 cursor-not-allowed relative overflow-hidden flex flex-col justify-between opacity-60"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="w-8 h-8 rounded-xl bg-slate-800/50 text-slate-500 flex items-center justify-center">
-                          <Smartphone className="w-4 h-4" />
-                        </div>
-                        <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded-full font-semibold">
-                          Bientôt
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-400 line-through">SMS Direct</p>
-                        <p className="text-[10px] text-amber-400/80 mt-0.5 font-medium">Bientôt disponible</p>
                       </div>
                     </button>
                   </div>
@@ -578,8 +579,8 @@ export const AuthPages: React.FC = () => {
                   type="submit"
                   disabled={isLoading}
                   className={`w-full flex items-center justify-center gap-2 font-bold text-xs py-3 rounded-xl transition shadow-lg mt-2 text-white disabled:opacity-60 ${otpChannel === 'telegram'
-                      ? 'bg-sky-600 hover:bg-sky-500 shadow-sky-950/60'
-                      : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/60'
+                    ? 'bg-sky-600 hover:bg-sky-500 shadow-sky-950/60'
+                    : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/60'
                     }`}
                 >
                   {isLoading ? (
@@ -591,7 +592,7 @@ export const AuthPages: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <span>Recevoir le code SMS</span>
+                      <span>Recevoir le code WhatsApp</span>
                       <MessageSquare className="w-4 h-4" />
                     </>
                   )}
@@ -664,8 +665,8 @@ export const AuthPages: React.FC = () => {
                 </button>
 
                 <div className={`p-4 rounded-2xl border space-y-2 ${otpChannel === 'telegram'
-                    ? 'bg-sky-950/40 border-sky-800/60 text-sky-200'
-                    : 'bg-emerald-950/40 border-emerald-800/60 text-emerald-200'
+                  ? 'bg-sky-950/40 border-sky-800/60 text-sky-200'
+                  : 'bg-emerald-950/40 border-emerald-800/60 text-emerald-200'
                   }`}>
                   <div className="flex items-center gap-2 text-xs font-bold text-white">
                     {otpChannel === 'telegram' ? (
@@ -675,8 +676,8 @@ export const AuthPages: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <Smartphone className="w-4 h-4 text-emerald-400" />
-                        <span>Code envoyé par SMS</span>
+                        <MessageSquare className="w-4 h-4 text-emerald-400" />
+                        <span>Code envoyé sur WhatsApp</span>
                       </>
                     )}
                   </div>

@@ -10,6 +10,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { DeliveryPartnersPage } from './pages/DeliveryPartnersPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { OrdersPage } from './pages/OrdersPage';
+import { FinancesPage } from './pages/FinancesPage';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route index element={<DashboardHome />} />
             <Route path="products" element={<ProductsPage />} />
             <Route path="orders" element={<OrdersPage />} />
+            <Route path="finance" element={<FinancesPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="delivery-partners" element={<DeliveryPartnersPage />} />
           </Route>

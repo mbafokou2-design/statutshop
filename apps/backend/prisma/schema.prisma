@@ -106,7 +106,7 @@ model OrderItem {
 model OtpCode {
   id        String   @id @default(uuid())
   phone     String
-  channel   String   @default("sms")
+  channel   String   @default("whatsapp") @map("channel")
   codeHash  String   @map("code_hash")
   expiresAt DateTime @map("expires_at")
   attempts  Int      @default(0)
@@ -182,4 +182,17 @@ model DeliveryPartnerRating {
 
   @@unique([partnerId, vendeurId])
   @@map("delivery_partner_ratings")
+}
+
+model WhatsAppContactActivity {
+  id            String   @id @default(uuid())
+  vendeurId     String   @map("vendeur_id")
+  customerPhone String   @map("customer_phone")
+  lastMessageAt DateTime @map("last_message_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([vendeurId, customerPhone])
+  @@index([vendeurId])
+  @@map("whatsapp_contact_activity")
 }
