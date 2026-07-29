@@ -4,7 +4,7 @@ import { sendWhatsAppOtp } from './whatsapp.service';
 import { sendTelegramOtp } from './telegramBot.service';
 
 const OTP_EXPIRY_MINUTES = 5;
-const MAX_ATTEMPTS = 1000;
+const MAX_ATTEMPTS = 3;
 
 // 1. On remplace 'sms' par 'whatsapp' dans le type
 export type OtpChannel = 'whatsapp' | 'telegram';
