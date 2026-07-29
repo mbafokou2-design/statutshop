@@ -4,7 +4,7 @@ import { AuthRequest } from '../middlewares/auth.middleware';
 import { updateSettingsSchema } from '../validators/settings.validator';
 
 export async function getSettings(req: AuthRequest, res: Response) {
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   const user = await prisma.user.findUnique({
     where: { id: vendeurId },
     select: {
@@ -24,7 +24,7 @@ export async function getSettings(req: AuthRequest, res: Response) {
 }
 
 export async function updateSettings(req: AuthRequest, res: Response) {
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   const parsed = updateSettingsSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.errors[0].message });

@@ -54,7 +54,7 @@ export async function getDeliveryPartnerCities(req: AuthRequest, res: Response) 
 
 export async function rateDeliveryPartner(req: AuthRequest, res: Response) {
   const { id } = req.params;
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
 
   const parsed = rateDeliveryPartnerSchema.safeParse(req.body);
   if (!parsed.success) {

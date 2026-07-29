@@ -13,7 +13,10 @@ function generateSixDigitCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-export async function verifyOtp(phone: string, code: string): Promise<boolean> {
+export async function verifyOtp(rawPhone: string, code: string): Promise<boolean> {
+  // 🟢 On formate systématiquement le numéro avant de chercher en BDD
+  const phone = formatPhoneNumber(rawPhone);
+
   const otpRecord = await prisma.otpCode.findFirst({
     where: { phone },
     orderBy: { createdAt: 'desc' },

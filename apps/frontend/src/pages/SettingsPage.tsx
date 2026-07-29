@@ -18,6 +18,7 @@ import {
   Phone,
   MapPin,
   FileText,
+  MessageSquare,
   Lock,
   Send,
   Save,
@@ -31,12 +32,19 @@ import {
   Truck,
 } from 'lucide-react';
 
+// 🟢 Déclaration de l'interface en dehors du composant (Fix de l'erreur TS1184)
+export interface WhatsAppStatus {
+  linked: boolean;
+  phoneNumber?: string | null;
+}
+
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
 
   const [settings, setSettings] = useState<StoreSettings | null>(null);
   const [telegramStatus, setTelegramStatus] = useState<TelegramStatus | null>(null);
+  const [whatsAppStatus, setWhatsAppStatus] = useState<WhatsAppStatus | null>(null);
   const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -65,24 +73,32 @@ export const SettingsPage: React.FC = () => {
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 4000);
   };
 
-  const load = async () => {
-    setStatus('loading');
-    try {
-      const [settingsData, telegramData] = await Promise.all([fetchSettings(), fetchTelegramStatus()]);
-      setSettings(settingsData);
-      setTelegramStatus(telegramData);
-      setForm({
-        storeName: settingsData.storeName,
-        whatsappBusinessNum: settingsData.whatsappBusinessNum,
-        city: settingsData.city,
-        neighborhood: settingsData.neighborhood,
-        description: settingsData.description,
-      });
-      setStatus('ok');
-    } catch {
-      setStatus('error');
-    }
-  };
+const load = async () => {
+  setStatus('loading');
+  try {
+    const [settingsData, telegramData, whatsappRes] = await Promise.all([
+      fetchSettings(),
+      fetchTelegramStatus(),
+      api.get<WhatsAppStatus>('/auth/whatsapp-status'),
+    ]);
+
+    setSettings(settingsData);
+    setTelegramStatus(telegramData);
+    setWhatsAppStatus(whatsappRes.data);
+
+    // 🟢 Remplacement systématique de null par une chaîne vide ''
+    setForm({
+      storeName: settingsData.storeName || '',
+      whatsappBusinessNum: settingsData.whatsappBusinessNum || '',
+      city: settingsData.city || '',
+      neighborhood: settingsData.neighborhood || '',
+      description: settingsData.description || '',
+    });
+    setStatus('ok');
+  } catch {
+    setStatus('error');
+  }
+};
 
   useEffect(() => {
     load();
@@ -281,8 +297,32 @@ export const SettingsPage: React.FC = () => {
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
         <h3 className="text-xs font-bold text-white mb-1">Mon compte</h3>
 
-        {/* Statut Telegram */}
+        {/* Statut WhatsApp */}
         <div className="flex items-center justify-between py-2.5 px-1">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <MessageSquare className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-white">Compte WhatsApp</p>
+              <p className="text-[10px] text-slate-400">
+                {whatsAppStatus?.phoneNumber || user?.phone}
+              </p>
+            </div>
+          </div>
+          {whatsAppStatus?.linked ? (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Lié
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-400">
+              <XCircle className="w-3.5 h-3.5" /> Non lié
+            </span>
+          )}
+        </div>
+
+        {/* Statut Telegram */}
+        <div className="flex items-center justify-between py-2.5 px-1 border-t border-slate-800/60">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
               <Send className="w-4 h-4" />
@@ -303,6 +343,7 @@ export const SettingsPage: React.FC = () => {
           )}
         </div>
 
+        {/* Changement de mot de passe */}
         <button
           onClick={() => setShowPasswordModal(true)}
           className="w-full flex items-center justify-between py-2.5 px-1 border-t border-slate-800/60"
@@ -316,6 +357,7 @@ export const SettingsPage: React.FC = () => {
           <ChevronRight className="w-4 h-4 text-slate-500" />
         </button>
 
+        {/* Déconnexion */}
         <button
           onClick={() => setShowLogoutModal(true)}
           className="w-full flex items-center justify-between py-2.5 px-1 border-t border-slate-800/60"

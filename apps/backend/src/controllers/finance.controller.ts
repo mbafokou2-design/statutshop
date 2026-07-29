@@ -24,7 +24,7 @@ export async function getFinanceSummary(req: AuthRequest, res: Response) {
     return res.status(400).json({ error: parsed.error.errors[0].message });
   }
 
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   const startDate = getStartDate(parsed.data.period);
 
   const orders = await prisma.order.findMany({

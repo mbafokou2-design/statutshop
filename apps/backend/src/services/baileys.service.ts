@@ -8,12 +8,14 @@ const activeSockets = new Map<string, any>();
 const logger = pino({ level: 'silent' });
 
 export async function startWhatsAppConnection(vendeurId: string, phoneNumber: string) {
+  // 1. Récupération / Création des identifiants
   const { state, saveCreds } = await usePrismaAuthState(vendeurId);
 
   const sock = makeWASocket({
     auth: state,
     logger,
     printQRInTerminal: false,
+    browser: ['StatutShop', 'Chrome', '1.0.0'], // Aide à la stabilité du pairing code
   });
 
   activeSockets.set(vendeurId, sock);
@@ -24,37 +26,56 @@ export async function startWhatsAppConnection(vendeurId: string, phoneNumber: st
     const { connection, lastDisconnect } = update;
 
     if (connection === 'open') {
+      console.log(`✅ WhatsApp connecté avec succès pour le vendeur : ${vendeurId}`);
+
       await prisma.whatsAppSession.upsert({
         where: { vendeurId },
-        update: { isConnected: true, phoneNumber },
-        create: { vendeurId, sessionData: '', isConnected: true, phoneNumber },
+        update: {
+          isConnected: true,
+          phoneNumber
+        },
+        create: {
+          vendeurId,
+          sessionData: JSON.stringify(state.creds),
+          isConnected: true,
+          phoneNumber
+        },
       });
     }
 
     if (connection === 'close') {
-      await prisma.whatsAppSession.updateMany({
-        where: { vendeurId },
-        data: { isConnected: false },
-      });
-
       const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
-      const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+      const isLoggedOut = statusCode === DisconnectReason.loggedOut || statusCode === 401;
+
+      console.warn(`⚠️ WhatsApp déconnecté (Raison: ${statusCode}). Reconnexion: ${!isLoggedOut}`);
 
       activeSockets.delete(vendeurId);
 
-      if (shouldReconnect) {
-        startWhatsAppConnection(vendeurId, phoneNumber).catch(() => {});
+      if (isLoggedOut) {
+        // 🟢 NETTOYAGE CRUCIAL : Si session 401, on supprime tout en BDD pour repartir à zéro !
+        console.log(`🧹 Suppression de la session obsolète/corrompue pour le vendeur : ${vendeurId}`);
+        await prisma.whatsAppSession.deleteMany({
+          where: { vendeurId },
+        }).catch(() => { });
+      } else {
+        // Si simple déconnexion réseau, on met à jour et re-essaie
+        await prisma.whatsAppSession.updateMany({
+          where: { vendeurId },
+          data: { isConnected: false },
+        }).catch(() => { });
+
+        startWhatsAppConnection(vendeurId, phoneNumber).catch(() => { });
       }
     }
   });
 
-  // Écoute des messages entrants -> ne garde que ceux liés à une commande StatutShop
+  // Écoute des messages entrants
   sock.ev.on('messages.upsert', async ({ messages }) => {
     for (const msg of messages) {
       if (!msg.message || msg.key.fromMe) continue;
 
       const remoteJid = msg.key.remoteJid;
-      if (!remoteJid || remoteJid.endsWith('@g.us')) continue; // ignore les groupes
+      if (!remoteJid || remoteJid.endsWith('@g.us')) continue;
 
       const senderPhone = '+' + remoteJid.split('@')[0];
 
@@ -69,13 +90,23 @@ export async function startWhatsAppConnection(vendeurId: string, phoneNumber: st
           create: { vendeurId, customerPhone: senderPhone, lastMessageAt: new Date() },
         });
       }
-      // Sinon : contact non lié à une commande StatutShop -> ignoré volontairement
     }
   });
 
   if (!sock.authState.creds.registered) {
-    const code = await sock.requestPairingCode(phoneNumber.replace(/[^0-9]/g, ''));
-    return { pairingCode: code };
+    // Retire le '+' et tous les caractères non numériques
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    try {
+      const code = await sock.requestPairingCode(cleanPhone);
+      return { pairingCode: code };
+    } catch (error: any) {
+      console.error('❌ Erreur pairing code:', error);
+      activeSockets.delete(vendeurId);
+      throw new Error("Échec de la génération du code. Vérifiez l'indicatif du numéro.");
+    }
   }
 
   return { pairingCode: null };
@@ -88,13 +119,12 @@ export function getActiveSocket(vendeurId: string) {
 export async function disconnectWhatsApp(vendeurId: string) {
   const sock = activeSockets.get(vendeurId);
   if (sock) {
-    await sock.logout().catch(() => {});
+    await sock.logout().catch(() => { });
     activeSockets.delete(vendeurId);
   }
-  await prisma.whatsAppSession.updateMany({
+  await prisma.whatsAppSession.deleteMany({
     where: { vendeurId },
-    data: { isConnected: false },
-  });
+  }).catch(() => { });
 }
 
 export async function sendRelanceMessage(vendeurId: string, customerPhone: string, message: string) {

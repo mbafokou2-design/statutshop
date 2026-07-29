@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { requireAuth } from '../middlewares/auth.middleware';
+import { requireVendeur } from '../middlewares/requireVendeur.middleware';
 import { uploadProductImage } from '../middlewares/upload.middleware';
 import {
   createProduct,
@@ -11,7 +12,7 @@ import {
 
 const router = Router();
 
-router.use(requireAuth); // toutes les routes ci-dessous exigent un token valide
+router.use(requireAuth, requireVendeur); // toutes les routes ci-dessous exigent un vendeur authentifié
 
 router.get('/', getProducts);
 router.get('/:id', getProductById);

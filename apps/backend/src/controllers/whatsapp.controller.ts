@@ -14,7 +14,7 @@ export async function connectWhatsApp(req: AuthRequest, res: Response) {
     return res.status(400).json({ error: parsed.error.errors[0].message });
   }
 
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
 
   try {
     const result = await startWhatsAppConnection(vendeurId, parsed.data.phoneNumber);
@@ -25,7 +25,7 @@ export async function connectWhatsApp(req: AuthRequest, res: Response) {
 }
 
 export async function getWhatsAppStatus(req: AuthRequest, res: Response) {
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   const session = await prisma.whatsAppSession.findUnique({ where: { vendeurId } });
 
   return res.json({
@@ -35,7 +35,7 @@ export async function getWhatsAppStatus(req: AuthRequest, res: Response) {
 }
 
 export async function disconnectWhatsAppHandler(req: AuthRequest, res: Response) {
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   await disconnectWhatsApp(vendeurId);
   return res.json({ message: 'WhatsApp déconnecté' });
 }
@@ -46,7 +46,7 @@ export async function sendRelance(req: AuthRequest, res: Response) {
     return res.status(400).json({ error: parsed.error.errors[0].message });
   }
 
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
 
   try {
     await sendRelanceMessage(vendeurId, parsed.data.customerPhone, parsed.data.message);
@@ -57,7 +57,7 @@ export async function sendRelance(req: AuthRequest, res: Response) {
 }
 
 export async function checkContactEligibility(req: AuthRequest, res: Response) {
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   const { phone } = req.params;
 
   const activity = await prisma.whatsAppContactActivity.findUnique({

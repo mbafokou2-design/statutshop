@@ -43,20 +43,20 @@ export async function handleRequestOtp(req: Request, res: Response) {
   }
 
   // 👈 WhatsApp par défaut si 'channel' n'est pas envoyé
-  const { channel = 'whatsapp', mode } = req.body; 
+  const { channel = 'whatsapp', mode } = req.body;
   const phone = formatPhoneNumber(parsed.data.phone);
 
   const existingUser = await prisma.user.findUnique({ where: { phone } });
 
   if (mode === 'register' && existingUser) {
-    return res.status(409).json({ 
-      error: 'Un compte StatutShop existe déjà avec ce numéro. Veuillez vous connecter.' 
+    return res.status(409).json({
+      error: 'Un compte StatutShop existe déjà avec ce numéro. Veuillez vous connecter.'
     });
   }
 
   if ((mode === 'login' || mode === 'reset_password') && !existingUser) {
-    return res.status(404).json({ 
-      error: "Aucun compte StatutShop trouvé pour ce numéro. Veuillez d'abord créer un compte." 
+    return res.status(404).json({
+      error: "Aucun compte StatutShop trouvé pour ce numéro. Veuillez d'abord créer un compte."
     });
   }
 
@@ -123,67 +123,66 @@ export async function handleVerifyOtp(req: Request, res: Response) {
         storeName: finalStoreName,
         storeSlug: slug,
         whatsappBusinessNum: phone,
-        logoUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1784994033/How_i_grew_my_business_using_Shopify_j2hs8v.jpg',
-        coverUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1784994034/t%C3%A9l%C3%A9charger_zzeoxu.jpg',
+        logoUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1785260830/StatutShop_p66wdk.png',
+        coverUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1785260830/StatutShop_p66wdk.png',
         description: 'Bienvenue dans notre boutique ! Découvrez nos produits de qualité.',
       },
     });
   }
 
-  const token = signToken({ userId: user.id, phone: user.phone });
+  if (user && !user.isActive) {
+    return res.status(403).json({ error: 'Votre boutique a été suspendue. Contactez le support.' });
+  }
+
+  const token = signToken({ id: user.id, phone: user.phone, role: user.role });
   res.cookie('token', token, COOKIE_OPTIONS);
 
-  return res.json({
-    message: 'Connexion réussie',
-    user: { 
-      id: user.id, 
-      phone: user.phone, 
-      storeName: user.storeName, 
+  return res.status(201).json({
+    message: 'Compte créé avec succès',
+    token,
+    user: {
+      id: user.id,
+      phone: user.phone,
+      storeName: user.storeName,
       storeSlug: user.storeSlug,
-      visitCount: user.visitCount || 0 // 👈 AJOUTÉ
+      role: user.role,
+      visitCount: user.visitCount || 0,
     },
   });
 }
 
 // 🟢 3. RÉINITIALISATION DU MOT DE PASSE
 export async function handleResetPassword(req: Request, res: Response) {
-  const parsed = resetPasswordSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.errors[0].message });
+  try {
+    const { phone, code, newPassword } = req.body;
+
+    if (!phone || !code || !newPassword) {
+      return res.status(400).json({ error: 'Tous les champs sont requis.' });
+    }
+
+    // verifyOtp va nettoyer et formater le numéro automatiquement grâce à notre mise à jour
+    const isValidOtp = await verifyOtp(phone, code);
+    if (!isValidOtp) {
+      return res.status(400).json({ error: 'Code OTP invalide ou expiré.' });
+    }
+
+    const cleaned = phone.replace(/\s+/g, '');
+    const formattedPhone = cleaned.startsWith('+') ? cleaned : `+${cleaned}`;
+
+    const hashedPassword = await argon2.hash(newPassword);
+
+    await prisma.user.update({
+      where: { phone: formattedPhone },
+      data: {
+        passwordHash: hashedPassword // 👈 Utilise passwordHash (ou password_hash selon ton schema.prisma)
+      },
+    });
+
+    return res.json({ message: 'Mot de passe réinitialisé avec succès !' });
+  } catch (error) {
+    console.error('❌ Erreur handleResetPassword:', error);
+    return res.status(500).json({ error: 'Erreur lors de la réinitialisation du mot de passe.' });
   }
-
-  const { code, newPassword } = parsed.data;
-  const phone = formatPhoneNumber(parsed.data.phone);
-
-  const user = await prisma.user.findUnique({ where: { phone } });
-  if (!user) {
-    return res.status(404).json({ error: "Aucun compte trouvé avec ce numéro." });
-  }
-
-  const isValid = await verifyOtp(phone, code);
-  if (!isValid) {
-    return res.status(401).json({ error: 'Code OTP invalide ou expiré' });
-  }
-
-  const passwordHash = await argon2.hash(newPassword);
-  const updatedUser = await prisma.user.update({
-    where: { phone },
-    data: { passwordHash },
-  });
-
-  const token = signToken({ userId: updatedUser.id, phone: updatedUser.phone });
-  res.cookie('token', token, COOKIE_OPTIONS);
-
-  return res.json({
-    message: 'Mot de passe modifié avec succès',
-    user: { 
-      id: updatedUser.id, 
-      phone: updatedUser.phone, 
-      storeName: updatedUser.storeName, 
-      storeSlug: updatedUser.storeSlug,
-      visitCount: updatedUser.visitCount || 0 // 👈 AJOUTÉ
-    },
-  });
 }
 
 // 🟢 4. CONNEXION CLASSIQUE
@@ -201,22 +200,28 @@ export async function handleLogin(req: Request, res: Response) {
     return res.status(401).json({ error: 'Identifiants incorrects ou compte inexistant.' });
   }
 
+  if (user && !user.isActive) {
+    return res.status(403).json({ error: 'Votre boutique a été suspendue. Contactez le support.' });
+  }
+
   const isValid = await argon2.verify(user.passwordHash, password);
   if (!isValid) {
     return res.status(401).json({ error: 'Identifiants incorrects' });
   }
 
-  const token = signToken({ userId: user.id, phone: user.phone });
+  const token = signToken({ id: user.id, phone: user.phone, role: user.role });
   res.cookie('token', token, COOKIE_OPTIONS);
 
-  return res.json({
+  return res.status(200).json({
     message: 'Connexion réussie',
-    user: { 
-      id: user.id, 
-      phone: user.phone, 
-      storeName: user.storeName, 
+    token,
+    user: {
+      id: user.id,
+      phone: user.phone,
+      storeName: user.storeName,
       storeSlug: user.storeSlug,
-      visitCount: user.visitCount || 0 // 👈 AJOUTÉ
+      role: user.role,
+      visitCount: user.visitCount || 0,
     },
   });
 }
@@ -252,23 +257,25 @@ export async function handleRegister(req: Request, res: Response) {
       storeName,
       storeSlug: slug,
       whatsappBusinessNum: phone,
-      logoUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1784994033/How_i_grew_my_business_using_Shopify_j2hs8v.jpg',
-      coverUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1784994034/t%C3%A9l%C3%A9charger_zzeoxu.jpg',
+      logoUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1785260830/StatutShop_p66wdk.png',
+      coverUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1785260830/StatutShop_p66wdk.png',
       description: 'Bienvenue dans notre boutique ! Découvrez nos produits de qualité.',
     },
   });
 
-  const token = signToken({ userId: user.id, phone: user.phone });
+  const token = signToken({ id: user.id, phone: user.phone, role: user.role });
   res.cookie('token', token, COOKIE_OPTIONS);
 
   return res.status(201).json({
     message: 'Compte créé avec succès',
-    user: { 
-      id: user.id, 
-      phone: user.phone, 
-      storeName: user.storeName, 
+    token,
+    user: {
+      id: user.id,
+      phone: user.phone,
+      storeName: user.storeName,
       storeSlug: user.storeSlug,
-      visitCount: user.visitCount || 0 // 👈 AJOUTÉ
+      role: user.role,
+      visitCount: user.visitCount || 0,
     },
   });
 }
@@ -291,7 +298,7 @@ export async function handleChangePassword(req: AuthRequest, res: Response) {
   }
 
   const { currentPassword, newPassword } = parsed.data;
-  const userId = req.user!.userId;
+  const userId = req.user!.id;
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {
@@ -326,26 +333,61 @@ export async function getTelegramStatus(req: AuthRequest, res: Response) {
   });
 }
 
-// 🟢 8. GET ME (Récupération du profil actuel)
-export async function getMe(req: AuthRequest, res: Response) {
-  const userId = req.user!.userId;
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { 
-      id: true, 
-      phone: true, 
-      storeName: true, 
-      storeSlug: true, 
-      visitCount: true // 👈 SÉLECTIONNÉ DEPUIS PRISMA
-    },
-  });
+// 🟢 STATUT LIAISON WHATSAPP (Basé uniquement sur l'utilisateur connecté)
+export async function getWhatsAppStatus(req: AuthRequest, res: Response) {
+  try {
+    const userId = req.user!.id;
 
-  if (!user) {
-    return res.status(404).json({ error: 'Utilisateur introuvable' });
+    const merchant = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { phone: true },
+    });
+
+    if (!merchant) {
+      return res.status(404).json({ error: 'Utilisateur introuvable' });
+    }
+
+    return res.json({
+      linked: Boolean(merchant.phone),
+      phoneNumber: merchant.phone,
+    });
+  } catch (error) {
+    console.error('❌ Erreur getWhatsAppStatus:', error);
+    return res.status(500).json({ error: 'Erreur lors de la récupération du statut WhatsApp' });
   }
 
-  return res.json({ user });
 }
+
+
+// 🟢 9. GET ME — Retourne l'utilisateur connecté avec son rôle à jour
+export const getMe = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Non authentifié' });
+    }
+
+    // req.user.id est garanti non-null depuis le middleware requireAuth
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        phone: true,
+        role: true,
+        storeName: true,
+        storeSlug: true,
+        visitCount: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur introuvable' });
+    }
+
+    return res.json(user);
+  } catch (error) {
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
 
 

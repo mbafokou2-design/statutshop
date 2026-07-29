@@ -9,6 +9,7 @@ export interface User {
   phone: string;
   storeName: string;
   storeSlug: string;
+  role: UserRole;
 }
 
 export type ProductCategory =
@@ -148,4 +149,29 @@ export interface WhatsAppStatus {
 
 export interface WhatsAppConnectResponse {
   pairingCode: string | null;
+}
+
+export type UserRole = 'VENDEUR' | 'SUPER_ADMIN';
+
+export interface AdminOverviewStats {
+  totalShops: number;
+  activeShops: number;
+  suspendedShops: number;
+  totalOrders: number;
+  totalRevenue: number;
+  totalDeliveryPartners: number;
+  certifiedDeliveryPartners: number;
+}
+
+export interface AdminShop {
+  id: string;
+  storeName: string;
+  storeSlug: string;
+  phone: string;
+  city: string;
+  neighborhood: string;
+  isActive: boolean;
+  createdAt: string;
+  ordersCount: number;
+  totalRevenue: number;
 }

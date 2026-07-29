@@ -11,6 +11,12 @@ import { DeliveryPartnersPage } from './pages/DeliveryPartnersPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { OrdersPage } from './pages/OrdersPage';
 import { FinancesPage } from './pages/FinancesPage';
+import { AdminRoute } from './components/auth/ProtectedRoute';
+import { AdminLayout } from './components/admin/AdminLayout';
+import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
+import { AdminShopsPage } from './pages/admin/AdminShopsPage';
+import { AdminDeliveryPartnersPage } from './pages/admin/AdminDeliveryPartnersPage';
+import { AdminTrafficPage } from './pages/admin/AdminTrafficPage';
 
 function App() {
   return (
@@ -27,6 +33,13 @@ function App() {
             <Route path="finance" element={<FinancesPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="delivery-partners" element={<DeliveryPartnersPage />} />
+          </Route>
+
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<AdminOverviewPage />} />
+            <Route path="shops" element={<AdminShopsPage />} />
+            <Route path="delivery-partners" element={<AdminDeliveryPartnersPage />} />
+            <Route path="traffic" element={<AdminTrafficPage />} />
           </Route>
 
           {/* Route publique pour voir la boutique */}

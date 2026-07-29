@@ -27,7 +27,7 @@ export async function createProduct(req: AuthRequest, res: Response) {
     return res.status(400).json({ error: parsed.error.errors[0].message });
   }
 
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   const imageUrl = (req.file as any)?.path || null;
   const slug = await generateUniqueSlug(vendeurId, parsed.data.title);
 
@@ -44,7 +44,7 @@ export async function createProduct(req: AuthRequest, res: Response) {
 }
 
 export async function getProducts(req: AuthRequest, res: Response) {
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
 
   const products = await prisma.product.findMany({
     where: { vendeurId },
@@ -55,7 +55,7 @@ export async function getProducts(req: AuthRequest, res: Response) {
 }
 
 export async function getProductById(req: AuthRequest, res: Response) {
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   const { id } = req.params;
 
   const product = await prisma.product.findFirst({
@@ -70,7 +70,7 @@ export async function getProductById(req: AuthRequest, res: Response) {
 }
 
 export async function updateProduct(req: AuthRequest, res: Response) {
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   const { id } = req.params;
 
   const parsed = updateProductSchema.safeParse(req.body);
@@ -103,7 +103,7 @@ export async function updateProduct(req: AuthRequest, res: Response) {
 }
 
 export async function deleteProduct(req: AuthRequest, res: Response) {
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   const { id } = req.params;
 
   const existing = await prisma.product.findFirst({ where: { id, vendeurId } });

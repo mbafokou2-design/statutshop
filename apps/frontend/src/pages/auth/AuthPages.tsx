@@ -74,15 +74,29 @@ export const AuthPages: React.FC = () => {
     setNewPassword('');
   };
 
-// --- LOGIQUE DE CONNEXION ---
+  // Helper pour rediriger selon le rôle utilisateur
+  const navigateByRole = (user: { role?: string }) => {
+    if (user.role === 'SUPER_ADMIN') {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
+  // --- LOGIQUE DE CONNEXION ---
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setToastError(null);
     setIsLoading(true);
     try {
       const res = await api.post('/auth/login', { phone: getFullPhone(), password });
+
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+      }
+
       setUser(res.data.user);
-      navigate('/dashboard');
+      navigateByRole(res.data.user);
     } catch (err: any) {
       triggerToastError(err.response?.data?.error || 'Identifiants incorrects ou compte inexistant.');
     } finally {
@@ -147,8 +161,13 @@ export const AuthPages: React.FC = () => {
         storeName,
         password
       });
+
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+      }
+
       setUser(res.data.user);
-      navigate('/dashboard');
+      navigateByRole(res.data.user);
     } catch (err: any) {
       triggerToastError(err.response?.data?.error || 'Code OTP incorrect ou expiré');
     } finally {
@@ -159,22 +178,42 @@ export const AuthPages: React.FC = () => {
   // --- VÉRIFICATION ET RÉINITIALISATION MOT DE PASSE ---
   const handleResetPasswordConfirm = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!enteredOtp || enteredOtp.length < 6) {
+      return triggerToastError('Veuillez saisir un code OTP à 6 chiffres.');
+    }
+
     if (!newPassword || newPassword.length < 6) {
       return triggerToastError('Le nouveau mot de passe doit faire au moins 6 caractères.');
     }
 
     setToastError(null);
     setIsLoading(true);
+
     try {
+      const fullPhone = getFullPhone();
+
       const res = await api.post('/auth/reset-password', {
-        phone: getFullPhone(),
+        phone: fullPhone,
         code: enteredOtp,
-        newPassword
+        newPassword,
       });
-      setUser(res.data.user);
-      navigate('/dashboard');
+
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+      }
+
+      if (res.data.user) {
+        setUser(res.data.user);
+        navigateByRole(res.data.user);
+      } else {
+        navigate('/login');
+      }
     } catch (err: any) {
-      triggerToastError(err.response?.data?.error || 'Code OTP invalide ou erreur de réinitialisation');
+      console.error('❌ Erreur reset password frontend:', err.response?.data);
+      triggerToastError(
+        err.response?.data?.error || 'Code OTP invalide ou expiré.'
+      );
     } finally {
       setIsLoading(false);
     }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { FinanceSummary, FinancePeriod } from '../types';
-import { fetchFinanceSummary } from '../services/Finance.service';
+import { fetchFinanceSummary } from '../services/finance.service';
 import { formatCurrency } from '../utils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { OfflineState } from '../components/ui/OfflineState';

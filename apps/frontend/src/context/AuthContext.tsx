@@ -15,19 +15,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isRestoring, setIsRestoring] = useState(true);
 
-  useEffect(() => {
-    const restoreSession = async () => {
-      try {
-        const res = await api.get('/auth/me');
-        setUser(res.data.user);
-      } catch {
-        setUser(null);
-      } finally {
-        setIsRestoring(false);
-      }
-    };
-    restoreSession();
-  }, []);
+useEffect(() => {
+  const checkAuth = async () => {
+    console.log('🔄 checkAuth démarré, token local:', localStorage.getItem('token'));
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      console.log('❌ Pas de token trouvé');
+      setUser(null);
+      setIsRestoring(false);
+      return;
+    }
+
+    try {
+      console.log('📡 Envoi de la requête /auth/me...');
+      const response = await api.get('/auth/me');
+      console.log('✅ Auth/me succès:', response.data);
+      setUser(response.data);
+    } catch (err) {
+      console.error('❌ Erreur auth/me:', err);
+      localStorage.removeItem('token');
+      setUser(null);
+    } finally {
+      setIsRestoring(false);
+    }
+  };
+
+  checkAuth();
+}, []);
 
   return (
     <AuthContext.Provider value={{ user, setUser, isRestoring }}>

@@ -14,8 +14,14 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum UserRole {
+  VENDEUR
+  SUPER_ADMIN
+}
+
 model User {
   id                  String                  @id @default(uuid())
+  role                UserRole                @default(VENDEUR)
   phone               String                  @unique
   passwordHash        String                  @map("password_hash")
   storeName           String                  @map("store_name")
@@ -29,6 +35,7 @@ model User {
   visitCount          Int                     @default(0) @map("visit_count")
   createdAt           DateTime                @default(now()) @map("created_at")
   updatedAt           DateTime                @updatedAt @map("updated_at")
+  isActive            Boolean  @default(true) @map("is_active")
 
   products            Product[]
   orders              Order[]                 // <-- AJOUTER CETTE LIGNE

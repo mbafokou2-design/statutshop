@@ -4,7 +4,7 @@ import { AuthRequest } from '../middlewares/auth.middleware';
 import { updateOrderStatusSchema, listOrdersQuerySchema } from '../validators/order.validator';
 
 export async function getOrders(req: AuthRequest, res: Response) {
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   const parsed = listOrdersQuerySchema.safeParse(req.query);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.errors[0].message });
@@ -20,7 +20,7 @@ export async function getOrders(req: AuthRequest, res: Response) {
 }
 
 export async function updateOrderStatus(req: AuthRequest, res: Response) {
-  const vendeurId = req.user!.userId;
+  const vendeurId = req.user!.id;
   const { id } = req.params;
 
   const parsed = updateOrderStatusSchema.safeParse(req.body);

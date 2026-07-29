@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { requireAuth } from '../middlewares/auth.middleware';
+import { requireVendeur } from '../middlewares/requireVendeur.middleware';
 import { getDeliveryPartners, getDeliveryPartnerCities, rateDeliveryPartner } from '../controllers/deliveryPartner.controller';
 
 const router = Router();
 
-router.use(requireAuth);
+router.use(requireAuth, requireVendeur);
 router.get('/', getDeliveryPartners);
 router.get('/cities', getDeliveryPartnerCities);
 router.post('/:id/rate', rateDeliveryPartner);
