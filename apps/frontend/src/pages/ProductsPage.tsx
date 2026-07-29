@@ -2,18 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { ProductCatalog } from '../components/products/ProductCatalog';
 import { ToastContainer, type ToastMessage } from '../components/ToastContainer';
 import type { Product } from '../types';
-import { 
-  fetchProducts, 
-  createProduct, 
-  updateProduct, 
-  deleteProductApi, 
-  type ProductFormData 
+import {
+  fetchProducts,
+  createProduct,
+  updateProduct,
+  deleteProductApi,
+  type ProductFormData
 } from '../services/product.service';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { OfflineState } from '../components/ui/OfflineState';
 
 export const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   const pushToast = (type: ToastMessage['type'], text: string) => {
@@ -23,13 +24,12 @@ export const ProductsPage: React.FC = () => {
   };
 
   const loadProducts = async () => {
-    setLoading(true);
+    setStatus('loading');
     try {
       setProducts(await fetchProducts());
+      setStatus('ok');
     } catch {
-      pushToast('error', 'Erreur lors du chargement des produits');
-    } finally {
-      setLoading(false);
+      setStatus('error');
     }
   };
 
@@ -88,8 +88,12 @@ export const ProductsPage: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (status === 'loading') {
     return <LoadingSpinner label="Chargement de vos produits..." />;
+  }
+
+  if (status === 'error') {
+    return <OfflineState onRetry={loadProducts} />;
   }
 
   return (
@@ -105,4 +109,4 @@ export const ProductsPage: React.FC = () => {
       <ToastContainer toasts={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
     </div>
   );
-};
+};

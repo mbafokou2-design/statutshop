@@ -14,6 +14,7 @@ import financeRoutes from './routes/finance.routes';
 import orderRoutes from './routes/order.routes';
 import whatsappRoutes from './routes/whatsapp.routes';
 import adminRoutes from './routes/admin.routes';
+import deliveryCandidateRoutes from './routes/deliveryCandidate.routes';
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use('/api/v1/finance', financeRoutes);
 app.use('/api/v1/whatsapp', whatsappRoutes);    // Pour les données financières & bénéfices
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/delivery-candidates', deliveryCandidateRoutes);
 
 app.get('/api/v1/health', (req, res) => {
   res.json({ status: 'ok', message: 'StatutShop API is running' });

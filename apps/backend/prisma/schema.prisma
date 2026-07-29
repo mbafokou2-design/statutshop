@@ -203,3 +203,22 @@ model WhatsAppContactActivity {
   @@index([vendeurId])
   @@map("whatsapp_contact_activity")
 }
+
+// Candidature spontanée d'un livreur (formulaire public, sans auth)
+model DeliveryCandidate {
+  id          String      @id @default(uuid())
+  fullName    String      @map("full_name")
+  phone       String      @unique
+  whatsappNum String      @map("whatsapp_num")
+  city        String
+  coveredZones String[]   @map("covered_zones")
+  vehicleType VehicleType @map("vehicle_type")
+  basePrice   String?     @map("base_price")
+  cniNumber   String      @map("cni_number")
+  motivation  String?
+  status      String      @default("PENDING") // PENDING | APPROVED | REJECTED
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  @@index([status])
+  @@map("delivery_candidates")
+}

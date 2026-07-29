@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { AuthScreen, OtpChannel } from '../../types';
 import { api } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { DeliveryDriverApplyPage } from './DeliveryDriverApplyPage';
 import {
   MessageSquare,
   ShieldCheck,
@@ -19,13 +20,14 @@ import {
   Bot,
   AlertCircle,
   X,
-  KeyRound
+  KeyRound,
+  Truck,
 } from 'lucide-react';
 
 type RegisterStep = 'form' | 'telegram_link' | 'otp_verify';
 type ResetStep = 'request' | 'verify';
 
-type ScreenType = AuthScreen | 'reset_password';
+type ScreenType = AuthScreen | 'reset_password' | 'driver_apply';
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'StatutShopBot';
 
@@ -218,6 +220,11 @@ export const AuthPages: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  // ---- Si l'utilisateur veut devenir livreur, afficher le formulaire dédié ----
+  if (screen === 'driver_apply') {
+    return <DeliveryDriverApplyPage onBack={() => { setScreen('login'); resetFlow(); }} />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-3 sm:p-4 bg-slate-950 relative overflow-hidden">
@@ -760,14 +767,27 @@ export const AuthPages: React.FC = () => {
         )}
 
         {/* Footer info */}
-        <div className="mt-6 pt-5 border-t border-slate-800 space-y-2 text-[11px] text-slate-400">
+        <div className="mt-6 pt-5 border-t border-slate-800 space-y-3 text-[11px] text-slate-400">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Sécurité renforcée par Telegram Bot & SMS OTP.</span>
+            <span>Sécurité renforcée par Telegram Bot &amp; SMS OTP.</span>
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>Redirection directe vers votre numéro WhatsApp personnel.</span>
+          </div>
+
+          {/* Lien Livreur */}
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={() => { setScreen('driver_apply'); resetFlow(); }}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-amber-500/30 bg-amber-500/8 hover:bg-amber-500/15 text-amber-400 text-[11px] font-bold transition group"
+            >
+              <Truck className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              <span>Je veux devenir Livreur Partenaire</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
           </div>
         </div>
       </div>
