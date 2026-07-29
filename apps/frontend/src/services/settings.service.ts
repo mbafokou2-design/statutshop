@@ -46,7 +46,7 @@ export async function updateSettings(data: SettingsFormData): Promise<StoreSetti
     latest = res.data.settings;
   }
 
-  return latest;
+  return latest!;
 }
 
 export async function changePassword(currentPassword: string | undefined, newPassword: string): Promise<void> {

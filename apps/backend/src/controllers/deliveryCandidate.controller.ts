@@ -7,15 +7,38 @@ const createCandidateSchema = z.object({
   phone: z.string().min(8, 'Numéro de téléphone invalide'),
   whatsappNum: z.string().min(8, 'Numéro WhatsApp invalide'),
   city: z.string().min(1, 'La ville est requise'),
-  coveredZones: z.array(z.string()).default([]),
+  coveredZones: z.union([z.array(z.string()), z.string()]).transform((val) => {
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') {
+      try {
+        const parsed = JSON.parse(val);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        return val.split(',').map((z) => z.trim()).filter(Boolean);
+      }
+    }
+    return [];
+  }).default([]),
   vehicleType: z.enum(['MOTO', 'CAR', 'BICYCLE', 'WALKING']),
-  basePrice: z.string().optional(),
+  basePrice: z.string().optional().nullable(),
   cniNumber: z.string().min(1, 'Le numéro CNI est requis'),
-  motivation: z.string().optional(),
+  avatarUrl: z.string().optional().nullable(),
+  cniPhotoUrl: z.string().optional().nullable(),
+  motivation: z.string().optional().nullable(),
 });
 
 export async function submitDeliveryCandidate(req: Request, res: Response) {
-  const parsed = createCandidateSchema.safeParse(req.body);
+  // Extraire les fichiers Cloudinary si transmis via multipart/form-data
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+  const uploadedAvatar = files?.avatar?.[0]?.path;
+  const uploadedCniPhoto = files?.cniPhoto?.[0]?.path;
+
+  const parsed = createCandidateSchema.safeParse({
+    ...req.body,
+    avatarUrl: uploadedAvatar || req.body.avatarUrl || null,
+    cniPhotoUrl: uploadedCniPhoto || req.body.cniPhotoUrl || null,
+  });
+
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.errors[0].message });
   }
@@ -32,7 +55,19 @@ export async function submitDeliveryCandidate(req: Request, res: Response) {
   }
 
   const candidate = await prisma.deliveryCandidate.create({
-    data: parsed.data,
+    data: {
+      fullName: parsed.data.fullName,
+      phone: parsed.data.phone,
+      whatsappNum: parsed.data.whatsappNum,
+      city: parsed.data.city,
+      coveredZones: parsed.data.coveredZones,
+      vehicleType: parsed.data.vehicleType,
+      basePrice: parsed.data.basePrice || null,
+      cniNumber: parsed.data.cniNumber,
+      avatarUrl: parsed.data.avatarUrl || null,
+      cniPhotoUrl: parsed.data.cniPhotoUrl || null,
+      motivation: parsed.data.motivation || null,
+    },
   });
 
   return res.status(201).json({
@@ -68,6 +103,42 @@ export async function updateCandidateStatus(req: Request, res: Response) {
     where: { id },
     data: { status },
   });
+
+  // Si le statut passe à APPROVED, on crée/certifie automatiquement le partenaire livreur
+  if (status === 'APPROVED') {
+    await prisma.deliveryPartner.upsert({
+      where: { phone: candidate.phone },
+      update: {
+        fullName: candidate.fullName,
+        whatsappNum: candidate.whatsappNum,
+        avatarUrl: candidate.avatarUrl,
+        cniNumber: candidate.cniNumber,
+        cniPhotoUrl: candidate.cniPhotoUrl,
+        city: candidate.city,
+        coveredZones: candidate.coveredZones,
+        vehicleType: candidate.vehicleType,
+        basePrice: candidate.basePrice,
+        motivation: candidate.motivation,
+        isVerified: true,
+        isActive: true,
+      },
+      create: {
+        fullName: candidate.fullName,
+        phone: candidate.phone,
+        whatsappNum: candidate.whatsappNum,
+        avatarUrl: candidate.avatarUrl,
+        cniNumber: candidate.cniNumber,
+        cniPhotoUrl: candidate.cniPhotoUrl,
+        city: candidate.city,
+        coveredZones: candidate.coveredZones,
+        vehicleType: candidate.vehicleType,
+        basePrice: candidate.basePrice,
+        motivation: candidate.motivation,
+        isVerified: true,
+        isActive: true,
+      },
+    });
+  }
 
   return res.json({ candidate });
 }

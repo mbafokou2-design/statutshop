@@ -160,11 +160,12 @@ model DeliveryPartner {
   whatsappNum     String      @map("whatsapp_num")
   avatarUrl       String?     @map("avatar_url")
   cniNumber       String      @map("cni_number")
-  cniPhotoUrl     String      @map("cni_photo_url")
+  cniPhotoUrl     String?     @map("cni_photo_url")
   city            String
   coveredZones    String[]    @map("covered_zones")
   vehicleType     VehicleType @map("vehicle_type")
   basePrice       String?     @map("base_price")
+  motivation      String?     @map("motivation")
   rating          Float       @default(5.0)
   totalDeliveries Int         @default(0) @map("total_deliveries")
   isVerified      Boolean     @default(false) @map("is_verified")
@@ -206,18 +207,21 @@ model WhatsAppContactActivity {
 
 // Candidature spontanée d'un livreur (formulaire public, sans auth)
 model DeliveryCandidate {
-  id          String      @id @default(uuid())
-  fullName    String      @map("full_name")
-  phone       String      @unique
-  whatsappNum String      @map("whatsapp_num")
-  city        String
-  coveredZones String[]   @map("covered_zones")
-  vehicleType VehicleType @map("vehicle_type")
-  basePrice   String?     @map("base_price")
-  cniNumber   String      @map("cni_number")
-  motivation  String?
-  status      String      @default("PENDING") // PENDING | APPROVED | REJECTED
-  createdAt   DateTime    @default(now()) @map("created_at")
+  id           String      @id @default(uuid())
+  fullName     String      @map("full_name")
+  phone        String      @unique
+  whatsappNum  String      @map("whatsapp_num")
+  avatarUrl    String?     @map("avatar_url")
+  city         String
+  coveredZones String[]    @map("covered_zones")
+  vehicleType  VehicleType @map("vehicle_type")
+  basePrice    String?     @map("base_price")
+  cniNumber    String      @map("cni_number")
+  cniPhotoUrl  String?     @map("cni_photo_url")
+  motivation   String?
+  status       String      @default("PENDING") // PENDING | APPROVED | REJECTED
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @default(now()) @updatedAt @map("updated_at")
 
   @@index([status])
   @@map("delivery_candidates")

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middlewares/auth.middleware';
 import { requireAdmin } from '../middlewares/requireAdmin.middleware';
+import { uploadDeliveryImages } from '../middlewares/upload.middleware';
 import {
   submitDeliveryCandidate,
   getDeliveryCandidates,
@@ -9,8 +10,15 @@ import {
 
 const router = Router();
 
-// Route publique — soumission de candidature (aucune auth requise)
-router.post('/', submitDeliveryCandidate);
+// Route publique — soumission de candidature avec gestion des fichiers (avatar & photo CNI)
+router.post(
+  '/',
+  uploadDeliveryImages.fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cniPhoto', maxCount: 1 },
+  ]),
+  submitDeliveryCandidate
+);
 
 // Routes admin — consultation et traitement des candidatures
 router.get('/', requireAuth, requireAdmin, getDeliveryCandidates);
