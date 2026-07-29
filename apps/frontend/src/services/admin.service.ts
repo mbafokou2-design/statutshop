@@ -19,3 +19,8 @@ export async function updateShopStatus(id: string, isActive: boolean): Promise<A
 export async function deleteShop(id: string): Promise<void> {
   await api.delete(`/admin/shops/${id}`);
 }
+
+export async function fetchAdminAnalytics(): Promise<any> {
+  const res = await api.get('/analytics/admin/analytics');
+  return res.data;
+}

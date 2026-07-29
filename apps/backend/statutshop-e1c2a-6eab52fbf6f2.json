@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "statutshop-e1c2a",
+  "private_key_id": "6eab52fbf6f21048c68dfaa1557dd2efb8b57029",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDWr//Qq106dEfv\n3Ip7iflIi4SCWPierk0WlTFbCoixnAoz0LTdQCFMJu1XaGg2lbRKhAZlA96qqVO2\nb2p1dxuUfq5XrMAO9Yrth9tkEukBf8K3FhjIuOo6sl79n0E9ta9qdZB2MG4ZaSWx\n0FhYxxpMtuW8ZcqQyhZMPztJ8hiMi8/hKphe4LZv7TySQZ1MiI1qF0i+OFlaQlb1\ndKqoSkdQc1S7M1e+7OkcmuOODFd4cSRzL5Q9PAw4J5JYqmIR1RL7uRAmRnPsjg1m\noXa+/CqkcJoFbAcq6nE6HagBoaGYyx4xa+e3VzU0Lx8ecDTk8MSIWacZo+jEY1VZ\n2ziuVWXPAgMBAAECggEAJkPOY8H3ZvDM1ZrIcAaCkQSVBKqY/adxhAHpfyGchZOb\nWersIbdJeApEKV0pnfkG3nUzspOC/4YYrp6jKfalyszdhDD9Nm1basTZPLgGIcdE\nzF864aPb08RxG+Fjvn0AnAgCTJ6LMSpFlrDc3k32iQ/cWL0H4tCyMrredWqaJ4p8\nLhlvGRyxoZ7QN7O3axn5fMesHExq4Qc62kBdWf5I9JbmvPTyTVtErjFr6sKsf0df\np4U63kvkiUN+ArHm0jgLzTmMpbj7f01k84/JLy1oHt2tP6n0juOEREbBTPgMTOYG\nOa+2uxXThXPBwBxYH6NOuDIhukwKchjbMxKVTzuRaQKBgQD6QstgwUbYNBKdeWD9\nuLAPn0ROXsp16mCHsjjPOaC7aRWFi1qehG7mKYTfFqsP8DHE6IDif1arbwXn9bN3\nGF46JTvI/0AGOtnPXDTHPMAEgexVHD/83Sc3JYOEjSarjDPlc2D6jEEDsHQXREeU\nG/KLv6lqhhpbimfdhq87CJdBFQKBgQDbnF039E4Wo3Z4Ho4bc0q56b53lEHKKH/e\ns+u4I8iUoQqWXKvr9QzQntbEAfEFNzSMVxhG2KOAoEeS+exjDJmKHCFovlzcMCOz\ngtYg8kc1wUIaO6i8rlKTWT4I/JITl9DFKgB8PWsJ4mxZGPIeNdypIsm/mi7TSeiX\nie79irkcUwKBgFb98u5OIQ80gqgEskdf9KtphHftkVkNwMJKnF7EPHAI5jdGqphh\nlp8hHZPisFHY/6Pf4jVZaEotTJNGID0s1kxF9xM2Tw4bVO00sw/yuRiYBQvMxx1h\nzqjnvGDOI/wLv1pqEfLl4A+lPaV80ZjVYilb1Us3FGBvqw0hLTZLFTDFAoGARqGV\nwadLbjCIq714CxAbmou4/JCsUC6SYbgQOhsYKeVZmF6Z1LvtsTNE86mEMR8+QVzJ\nrA+FFpt2KalEA99LioXdoOiIyTCaauPLprEFgh5z+ifx7y1J1aZAM3e4K6EKPj9y\nBINkZ7txCX7icCD2pVdQ99TI9p+wtPxh5x20x40CgYBhEaQHLUSps5AEh1Asr+PY\ndcBTTpCyF+d6+QB8qx8jekUzH/jxQMMlUfBpic0Os5gv5CmH0oJdPGkvj7wSVcVZ\nicq2qcOTmCwz0OARS9NK57dkBNryIMOzeTgjS/lfuQbKrJJ1SrpDqMbw7ocaBwSX\nJCLqE4T06TwE/MM76HHSlA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "statutshop-analytics-sa-293@statutshop-e1c2a.iam.gserviceaccount.com",
+  "client_id": "104791301955425052866",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/statutshop-analytics-sa-293%40statutshop-e1c2a.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

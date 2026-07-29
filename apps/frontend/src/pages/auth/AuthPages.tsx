@@ -100,7 +100,13 @@ export const AuthPages: React.FC = () => {
       setUser(res.data.user);
       navigateByRole(res.data.user);
     } catch (err: any) {
-      triggerToastError(err.response?.data?.error || 'Identifiants incorrects ou compte inexistant.');
+      if (!err.response) {
+        triggerToastError("Impossible de contacter le serveur. Vérifiez votre connexion internet.");
+      } else if (err.response.status >= 500) {
+        triggerToastError("Erreur serveur ou base de données momentanément indisponible. Réessayez dans un instant.");
+      } else {
+        triggerToastError(err.response?.data?.error || 'Identifiants incorrects ou compte inexistant.');
+      }
     } finally {
       setIsLoading(false);
     }

@@ -159,6 +159,7 @@ export interface AdminOverviewStats {
   suspendedShops: number;
   totalOrders: number;
   totalRevenue: number;
+  totalVisits?: number;
   totalDeliveryPartners: number;
   certifiedDeliveryPartners: number;
 }
@@ -171,6 +172,7 @@ export interface AdminShop {
   city: string;
   neighborhood: string;
   isActive: boolean;
+  visitCount?: number;
   createdAt: string;
   ordersCount: number;
   totalRevenue: number;

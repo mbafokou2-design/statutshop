@@ -74,13 +74,17 @@ export const AdminOverviewPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
+        <div className="bg-slate-900 border border-indigo-500/30 rounded-2xl p-4 space-y-2 relative overflow-hidden">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-semibold">Visiteurs</span>
-            <Eye className="w-4 h-4 text-blue-400" />
+            <span className="text-xs font-semibold text-indigo-300">Visites Totales</span>
+            <Eye className="w-4 h-4 text-indigo-400" />
           </div>
-          <span className="text-2xl font-black text-white font-mono">—</span>
-          <span className="text-[10px] text-slate-500">Google Analytics à venir</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-black text-white font-mono">{stats.totalVisits ?? 0}</span>
+          </div>
+          <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Vues boutiques
+          </span>
         </div>
       </div>
     </div>

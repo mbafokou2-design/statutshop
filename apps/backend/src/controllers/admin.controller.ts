@@ -4,12 +4,13 @@ import { AuthRequest } from '../middlewares/auth.middleware';
 import { updateShopStatusSchema, createAdminDeliveryPartnerSchema } from '../validators/admin.validator';
 
 export async function getAdminOverview(req: AuthRequest, res: Response) {
-  const [shopsCount, activeShopsCount, ordersCount, revenueAgg, deliveryPartnersCount, certifiedCount] =
+  const [shopsCount, activeShopsCount, ordersCount, revenueAgg, visitsAgg, deliveryPartnersCount, certifiedCount] =
     await Promise.all([
       prisma.user.count({ where: { role: 'VENDEUR' } }),
       prisma.user.count({ where: { role: 'VENDEUR', isActive: true } }),
       prisma.order.count(),
       prisma.order.aggregate({ where: { status: 'DELIVERED' }, _sum: { totalAmount: true } }),
+      prisma.user.aggregate({ where: { role: 'VENDEUR' }, _sum: { visitCount: true } }),
       prisma.deliveryPartner.count(),
       prisma.deliveryPartner.count({ where: { isVerified: true } }),
     ]);
@@ -20,6 +21,7 @@ export async function getAdminOverview(req: AuthRequest, res: Response) {
     suspendedShops: shopsCount - activeShopsCount,
     totalOrders: ordersCount,
     totalRevenue: Number(revenueAgg._sum.totalAmount || 0),
+    totalVisits: Number(visitsAgg._sum.visitCount || 0),
     totalDeliveryPartners: deliveryPartnersCount,
     certifiedDeliveryPartners: certifiedCount,
   });
@@ -43,7 +45,7 @@ export async function getAllShops(req: AuthRequest, res: Response) {
     },
     select: {
       id: true, storeName: true, storeSlug: true, phone: true, city: true, neighborhood: true,
-      isActive: true, createdAt: true,
+      isActive: true, visitCount: true, createdAt: true,
       _count: { select: { orders: true } },
     },
     orderBy: { createdAt: 'desc' },

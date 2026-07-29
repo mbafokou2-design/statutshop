@@ -7,7 +7,7 @@ import { OfflineState } from '../../components/ui/OfflineState';
 import { ToastContainer } from '../../components/ToastContainer';
 import type { ToastMessage } from '../../components/ToastContainer';
 import {
-  Store, Search, MapPin, Ban, CheckCircle, Trash2, AlertTriangle
+  Store, Search, MapPin, Ban, CheckCircle, Trash2, AlertTriangle, Eye
 } from 'lucide-react';
 
 export const AdminShopsPage: React.FC = () => {
@@ -113,7 +113,14 @@ export const AdminShopsPage: React.FC = () => {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-center text-xs">
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                  <span className="text-[10px] text-slate-500 uppercase block">Visites</span>
+                  <span className="font-bold text-indigo-400 font-mono flex items-center justify-center gap-1">
+                    <Eye className="w-3 h-3 text-indigo-400" />
+                    {shop.visitCount ?? 0}
+                  </span>
+                </div>
                 <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
                   <span className="text-[10px] text-slate-500 uppercase block">Commandes</span>
                   <span className="font-bold text-white font-mono">{shop.ordersCount}</span>
