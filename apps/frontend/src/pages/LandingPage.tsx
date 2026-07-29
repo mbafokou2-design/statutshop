@@ -17,6 +17,7 @@ import {
   Globe,
 } from 'lucide-react';
 import { fetchPublicShopsCount } from '../services/whatsapp.service';
+// import logo from '../../public/StatutShop.png'
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -60,13 +61,17 @@ export const LandingPage: React.FC = () => {
 
     setIsSubmittingContact(true);
     try {
-      // 🟢 Prêt pour Formspree : Remplacez VOTRE_FORM_ID par votre ID Formspree (ex: https://formspree.io/f/xyz)
-      // const res = await fetch('https://formspree.io/f/VOTRE_FORM_ID', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ ...contactForm, _replyto: 'mbafokou2@gmail.com' })
-      // });
-      
+
+      const res = await fetch('https://formspree.io/f/xbdnbyka', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...contactForm, _replyto: 'mbafokou2@gmail.com' })
+      });
+
+      if (!res.ok) {
+        throw new Error('Form submission failed');
+      }
+
       await new Promise((r) => setTimeout(r, 800));
       showToast('Message envoyé ! Un conseiller StatutShop vous recontactera sous 15 minutes.');
       setContactForm({
@@ -87,7 +92,7 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-white scroll-smooth">
       {/* HTML de base pour activer le défilement fluide global */}
-      <style dangerouslySetInnerHTML={{__html: `html { scroll-behavior: smooth; }`}} />
+      <style dangerouslySetInnerHTML={{ __html: `html { scroll-behavior: smooth; }` }} />
 
       {/* Toast Notif */}
       {toastMessage && (
@@ -99,15 +104,12 @@ export const LandingPage: React.FC = () => {
       {/* 1. NAVBAR */}
       <nav className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          {/* Logo - Placeholder Prêt pour votre image de logo */}
           <div className="cursor-pointer flex items-center gap-2" onClick={() => navigate('/')}>
-            {/* 🟢 REMPLACEZ LE src="/logo.png" PAR VOTRE PROPRE LOGO IMAGE LE MOMENT VENU */}
-            <div className="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden shadow-lg shadow-emerald-500/5">
-              <img 
-                src="/logo.png" 
-                alt="StatutShop" 
+            <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden shadow-lg shadow-emerald-500/5">
+              <img
+                src="/StatutShop.png"
+                alt="StatutShop"
                 onError={(e) => {
-                  // Fallback élégant en icône si le fichier logo.png n'est pas encore présent
                   e.currentTarget.style.display = 'none';
                   const parent = e.currentTarget.parentElement;
                   if (parent) {
@@ -172,7 +174,7 @@ export const LandingPage: React.FC = () => {
             <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-300 hover:text-emerald-400">Comment ça marche</a>
             <a href="#why-us" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-300 hover:text-emerald-400">Pourquoi nous</a>
             <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-300 hover:text-emerald-400">Contact</a>
-            
+
             <div className="pt-3 border-t border-slate-800 space-y-2">
               <button
                 onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}
@@ -201,7 +203,7 @@ export const LandingPage: React.FC = () => {
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black tracking-wide uppercase">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                <span>La Plateforme N°1 E-Commerce WhatsApp au Cameroun</span>
+                <span>La Plateforme d'E-Commerce WhatsApp au Cameroun</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl xl:text-6xl font-black text-white leading-[1.15] tracking-tight">
@@ -246,7 +248,7 @@ export const LandingPage: React.FC = () => {
                 {/* Hero Showcase Placeholder Image */}
                 <div className="relative rounded-2xl overflow-hidden mb-4 border border-slate-800">
                   <img
-                    src="https://images.unsplash.com/photo-1556742049-0a67daf4095a?auto=format&fit=crop&w=800&q=80"
+                    src="/hero.png"
                     alt="Boutique en ligne StatutShop"
                     className="w-full h-48 object-cover"
                   />
@@ -461,7 +463,7 @@ export const LandingPage: React.FC = () => {
             {/* Showcase Image Placeholder */}
             <div className="lg:col-span-7 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl">
               <img
-                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1000&q=80"
+                src="/stat.png"
                 alt="Gestion E-Commerce StatutShop"
                 className="w-full h-80 object-cover"
               />
@@ -641,10 +643,10 @@ export const LandingPage: React.FC = () => {
             <div className="lg:col-span-2 space-y-4">
               <div className="flex items-center gap-2">
                 {/* 🟢 REMPLACEZ LE src="/logo.png" PAR VOTRE PROPRE LOGO IMAGE LE MOMENT VENU */}
-                <div className="w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="/logo.png" 
-                    alt="StatutShop" 
+                <div className="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden">
+                  <img
+                    src="/StatutShop.png"
+                    alt="StatutShop"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       const parent = e.currentTarget.parentElement;
