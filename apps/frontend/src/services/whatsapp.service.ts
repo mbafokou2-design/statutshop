@@ -14,3 +14,12 @@ export async function connectWhatsApp(phoneNumber: string): Promise<WhatsAppConn
 export async function disconnectWhatsApp(): Promise<void> {
   await api.post('/whatsapp/disconnect');
 }
+
+export async function fetchPublicShopsCount(): Promise<number> {
+  try {
+    const res = await api.get('/shop/info/shops-count');
+    return res.data.count;
+  } catch {
+    return 1200; // fallback
+  }
+}

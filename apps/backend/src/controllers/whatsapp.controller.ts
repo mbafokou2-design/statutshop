@@ -17,6 +17,9 @@ export async function connectWhatsApp(req: AuthRequest, res: Response) {
   const vendeurId = req.user!.id;
 
   try {
+    // Purge de l'ancienne session non finalisée pour éviter que WhatsApp n'invalide le nouveau pairing code
+    await disconnectWhatsApp(vendeurId).catch(() => {});
+
     const result = await startWhatsAppConnection(vendeurId, parsed.data.phoneNumber);
     return res.json(result);
   } catch (err: any) {

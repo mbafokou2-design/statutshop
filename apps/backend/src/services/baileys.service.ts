@@ -8,6 +8,17 @@ const activeSockets = new Map<string, any>();
 const logger = pino({ level: 'silent' });
 
 export async function startWhatsAppConnection(vendeurId: string, phoneNumber: string) {
+  // 0. Si une socket active existe déjà sans être connectée, fermer proprement
+  if (activeSockets.has(vendeurId)) {
+    try {
+      const oldSock = activeSockets.get(vendeurId);
+      oldSock.ev.removeAllListeners('connection.update');
+      oldSock.ev.removeAllListeners('creds.update');
+      oldSock.ws?.close();
+    } catch (e) {}
+    activeSockets.delete(vendeurId);
+  }
+
   // 1. Récupération / Création des identifiants
   const { state, saveCreds } = await usePrismaAuthState(vendeurId);
 
@@ -15,7 +26,8 @@ export async function startWhatsAppConnection(vendeurId: string, phoneNumber: st
     auth: state,
     logger,
     printQRInTerminal: false,
-    browser: ['StatutShop', 'Chrome', '1.0.0'], // Aide à la stabilité du pairing code
+    browser: ['Ubuntu', 'Chrome', '20.0.04'], // Format officiel reconnu par WhatsApp pour le Pairing Code
+    markOnlineOnConnect: false,
   });
 
   activeSockets.set(vendeurId, sock);
@@ -97,7 +109,8 @@ export async function startWhatsAppConnection(vendeurId: string, phoneNumber: st
     // Retire le '+' et tous les caractères non numériques
     const cleanPhone = phoneNumber.replace(/\D/g, '');
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Laisser le temps à la connexion WebSocket de s'enregistrer auprès de WhatsApp
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     try {
       const code = await sock.requestPairingCode(cleanPhone);

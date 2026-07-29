@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { WhatsAppStatus } from '../../types';
 import { fetchWhatsAppStatus, connectWhatsApp, disconnectWhatsApp } from '../../services/whatsapp.service';
 import {
-  MessageCircle, CheckCircle2, XCircle, RefreshCw, Copy, Check, Phone, X, ChevronRight
+  MessageCircle, CheckCircle2,  RefreshCw, Copy, Check, Phone, X, 
 } from 'lucide-react';
 
 interface ConnectWhatsAppSectionProps {
@@ -54,12 +54,12 @@ export const ConnectWhatsAppSection: React.FC<ConnectWhatsAppSectionProps> = ({ 
     return () => clearInterval(interval);
   }, [step]);
 
-  const openModal = () => {
-    setStep('enter_phone');
-    setPhoneNumber('');
-    setPairingCode(null);
-    setShowModal(true);
-  };
+  // const openModal = () => {
+  //   setStep('enter_phone');
+  //   setPhoneNumber('');
+  //   setPairingCode(null);
+  //   setShowModal(true);
+  // };
 
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,18 +130,20 @@ export const ConnectWhatsAppSection: React.FC<ConnectWhatsAppSectionProps> = ({ 
             </button>
           </div>
         ) : (
-          <button
-            onClick={openModal}
-            className="w-full flex items-center justify-between bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl p-3 transition"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center shrink-0">
-                <XCircle className="w-4 h-4" />
-              </div>
-              <span className="text-xs font-bold text-white">Connecter mon WhatsApp</span>
+        <div className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+              <MessageCircle className="w-4 h-4" />
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-500" />
-          </button>
+            <div>
+              <p className="text-xs font-bold text-slate-300">Relances WhatsApp en direct</p>
+              <p className="text-[10px] text-amber-400/90 font-medium">Bientôt disponible • Fonctionnalité en cours d'optimisation</p>
+            </div>
+          </div>
+          <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/20 rounded-lg">
+            Prochainement
+          </span>
+        </div>
         )}
       </div>
 
