@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import type { Product, StoreSettings } from '../../types';
 import { CATEGORY_LABELS } from '../../types';
 import { formatCurrency, generateWhatsAppLink } from '../../utils';
@@ -24,9 +25,9 @@ const DELIVERY_OPTIONS = [
   { value: 'Récupération en boutique', label: '📍 Récupération directe en boutique' },
 ];
 
-export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
+export const ProductDetailModal = ({
   product, isOpen, onClose, storeSettings, onOrderSubmitted,
-}) => {
+}: ProductDetailModalProps) => {
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -36,7 +37,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
   if (!isOpen || !product) return null;
 
-  const handleOrderWhatsApp = async (e: React.FormEvent) => {
+  const handleOrderWhatsApp = async (e: FormEvent) => {
     e.preventDefault();
     if (!clientName.trim() || !clientPhone.trim() || !address.trim()) return;
 
@@ -59,115 +60,156 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden my-0 sm:my-6 max-h-[95vh] overflow-y-auto">
+      <div className="card-border rounded-t-3xl sm:rounded-3xl w-full max-w-2xl shadow-panel overflow-hidden my-0 sm:my-6 max-h-[95vh] overflow-y-auto relative">
+        <div className="dotted-grid absolute inset-0 opacity-10 pointer-events-none" />
+
         <div className="relative h-56 sm:h-72 bg-slate-950 overflow-hidden">
           <img
-            src={product.imageUrl || 'https://placehold.co/600x400/1e293b/64748b?text=Photo'}
+            src={product.imageUrl || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop'}
             alt={product.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/40 to-transparent" />
 
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-white bg-slate-950/60 hover:bg-slate-900 rounded-full border border-white/20 transition backdrop-blur-sm"
+            className="absolute top-4 right-4 p-2 text-white bg-slate-950/70 hover:bg-slate-900 rounded-full border border-white/20 transition backdrop-blur-sm cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
 
-          <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end gap-2">
+          <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end gap-2.5 z-10">
             <div className="min-w-0">
-              <span className="inline-block bg-emerald-500 text-slate-950 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-1">
+              <span className="inline-block bg-whatsapp text-ink-950 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-1">
                 {CATEGORY_LABELS[product.category]}
               </span>
-              <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight truncate">{product.title}</h2>
+              <h2 className="text-lg sm:text-2xl font-display font-semibold text-white tracking-tight truncate">
+                {product.title}
+              </h2>
             </div>
             <div className="text-right bg-slate-950/80 px-3 py-1.5 rounded-2xl border border-white/10 backdrop-blur-sm shrink-0">
-              <span className="text-[10px] text-slate-400 block uppercase font-semibold">Prix Uni.</span>
-              <span className="text-base sm:text-lg font-black text-emerald-400">{formatCurrency(product.priceSelling)}</span>
+              <span className="text-[10px] text-slate-450 block uppercase font-semibold">Prix Uni.</span>
+              <span className="text-base sm:text-lg font-bold text-whatsapp">
+                {formatCurrency(product.priceSelling)}
+              </span>
             </div>
           </div>
         </div>
 
-        <div className="p-4 sm:p-6 space-y-5">
+        <div className="p-4 sm:p-6 space-y-5 relative z-10">
           {product.description && (
-            <p className="text-xs text-slate-300 leading-relaxed bg-slate-950/50 p-3 rounded-2xl border border-slate-800">
+            <p className="text-xs sm:text-sm text-slate-305 leading-relaxed bg-slate-950/40 p-4 rounded-2xl border border-slate-800/80">
               {product.description}
             </p>
           )}
 
           <form onSubmit={handleOrderWhatsApp} className="space-y-4">
-            <div className="border-t border-slate-800 pt-4">
-              <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+            <div className="border-t border-slate-800/60 pt-4">
+              <h3 className="text-xs font-bold text-whatsapp uppercase tracking-wider flex items-center gap-1.5 mb-4 font-mono">
                 <Sparkles className="w-4 h-4" /> Vos Coordonnées pour la Livraison
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">Nom & Prénom *</label>
+                  <label className="block text-xs font-semibold text-slate-350 mb-1.5">Nom & Prénom *</label>
                   <div className="relative">
-                    <User className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5" />
-                    <input type="text" required placeholder="ex: Amina Bella" value={clientName}
+                    <User className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="ex: Amina Bella"
+                      value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 outline-none transition" />
+                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/25 rounded-xl pl-9 pr-3 py-3 text-sm text-white placeholder-slate-600 outline-none transition"
+                    />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">Numéro WhatsApp *</label>
+                  <label className="block text-xs font-semibold text-slate-350 mb-1.5">Numéro WhatsApp *</label>
                   <div className="relative">
-                    <Phone className="w-3.5 h-3.5 text-emerald-400 absolute left-3 top-2.5" />
-                    <input type="tel" required placeholder="+237 6XX XX XX XX" value={clientPhone}
+                    <Phone className="w-4 h-4 text-whatsapp absolute left-3 top-3.5" />
+                    <input
+                      type="tel"
+                      required
+                      placeholder="+237 6XX XX XX XX"
+                      value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white font-mono placeholder-slate-500 outline-none transition" />
+                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/25 rounded-xl pl-9 pr-3 py-3 text-sm text-white font-mono placeholder-slate-650 outline-none transition"
+                    />
                   </div>
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">Quartier & Ville *</label>
+                  <label className="block text-xs font-semibold text-slate-350 mb-1.5">Quartier & Ville *</label>
                   <div className="relative">
-                    <MapPin className="w-3.5 h-3.5 text-amber-400 absolute left-3 top-2.5" />
-                    <input type="text" required placeholder="ex: Bastos, Yaoundé" value={address}
+                    <MapPin className="w-4 h-4 text-amber-400 absolute left-3 top-3.5" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="ex: Bastos, Yaoundé"
+                      value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 outline-none transition" />
+                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/25 rounded-xl pl-9 pr-3 py-3 text-sm text-white placeholder-slate-600 outline-none transition"
+                    />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">Quantité *</label>
+                  <label className="block text-xs font-semibold text-slate-350 mb-1.5">Quantité *</label>
                   <div className="flex items-center gap-2">
-                    <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-9 h-9 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 font-bold hover:bg-slate-800">-</button>
-                    <span className="text-xs font-bold text-white px-3">{quantity}</span>
-                    <button type="button" onClick={() => setQuantity(quantity + 1)}
-                      className="w-9 h-9 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 font-bold hover:bg-slate-800">+</button>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-10 h-10 rounded-xl bg-slate-950/80 border border-slate-800/80 text-slate-300 font-bold hover:bg-slate-800 transition cursor-pointer"
+                    >
+                      -
+                    </button>
+                    <span className="text-sm font-bold text-white px-3">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-10 h-10 rounded-xl bg-slate-950/80 border border-slate-800/80 text-slate-300 font-bold hover:bg-slate-800 transition cursor-pointer"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-300 mb-1.5 flex items-center gap-1">
-                <Truck className="w-3.5 h-3.5 text-sky-400" /> Mode de Livraison
+              <label className="block text-xs font-semibold text-slate-350 mb-1.5 flex items-center gap-1.5">
+                <Truck className="w-4 h-4 text-sky-400" /> Mode de Livraison
               </label>
-              <select value={deliveryOption} onChange={(e) => setDeliveryOption(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none transition">
-                {DELIVERY_OPTIONS.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+              <select
+                value={deliveryOption}
+                onChange={(e) => setDeliveryOption(e.target.value)}
+                className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/25 rounded-xl px-3.5 py-3 text-sm text-white outline-none transition cursor-pointer"
+              >
+                {DELIVERY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
               </select>
             </div>
 
-            <div className="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between">
+            <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 flex items-center justify-between shadow-inner">
               <div>
-                <span className="text-[11px] text-slate-400 block">Total :</span>
-                <span className="text-lg sm:text-xl font-black text-white">{formatCurrency(totalPrice)}</span>
+                <span className="text-[11px] text-slate-500 block uppercase font-bold tracking-wider">Total :</span>
+                <span className="text-xl font-display font-semibold text-white">{formatCurrency(totalPrice)}</span>
               </div>
-              <div className="flex items-center gap-1 text-[11px] text-emerald-400 font-medium">
+              <div className="flex items-center gap-1.5 text-xs text-whatsapp font-bold">
                 <ShieldCheck className="w-4 h-4" /> Paiement à la livraison
               </div>
             </div>
 
-            <button type="submit" disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm py-3.5 rounded-2xl transition shadow-xl shadow-emerald-950 disabled:opacity-60">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-2 bg-whatsapp hover:bg-[#2ee071] text-ink-950 font-bold text-sm py-3.5 rounded-xl transition shadow-lg shadow-emerald-950/60 cursor-pointer active:translate-y-px disabled:opacity-60"
+            >
               <MessageSquare className="w-5 h-5" />
               <span>{isSubmitting ? 'Envoi...' : 'Commander via WhatsApp'}</span>
             </button>

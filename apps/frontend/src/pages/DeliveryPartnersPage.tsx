@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { DeliveryPartner } from '../types';
 import { VEHICLE_LABELS } from '../types';
@@ -17,7 +17,7 @@ function vehicleIcon(type: DeliveryPartner['vehicleType']) {
   return PersonStanding;
 }
 
-export const DeliveryPartnersPage: React.FC = () => {
+export const DeliveryPartnersPage = () => {
   const navigate = useNavigate();
   const [partners, setPartners] = useState<DeliveryPartner[]>([]);
   const [cities, setCities] = useState<string[]>([]);
@@ -69,25 +69,30 @@ export const DeliveryPartnersPage: React.FC = () => {
   if (status === 'error') return <OfflineState onRetry={load} />;
 
   return (
-    <div className="p-3 sm:p-6 space-y-4 pb-10">
+    <div className="p-2 sm:p-4 space-y-5 pb-10">
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition shrink-0">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 text-slate-400 hover:text-white bg-slate-900/60 border border-slate-800/80 rounded-lg transition shrink-0 cursor-pointer"
+        >
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div>
-          <h1 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-            <Truck className="w-5 h-5 text-emerald-400" /> Réseau de Livreurs
+          <h1 className="text-lg sm:text-xl font-display font-semibold text-white flex items-center gap-2">
+            <Truck className="w-5.5 h-5.5 text-whatsapp" /> Réseau de Livreurs
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">Livreurs certifiés, contactez-les directement sur WhatsApp</p>
+          <p className="text-xs text-slate-400">Livreurs certifiés, contactez-les directement sur WhatsApp</p>
         </div>
       </div>
 
       {/* Filtre ville */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
         <button
           onClick={() => setSelectedCity('')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition shrink-0 ${
-            selectedCity === '' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-800'
+          className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition duration-200 cursor-pointer shrink-0 ${
+            selectedCity === ''
+              ? 'bg-whatsapp text-ink-950 font-bold shadow-md'
+              : 'bg-slate-900/60 text-slate-400 border border-slate-850 hover:text-white'
           }`}
         >
           Toutes les villes
@@ -96,8 +101,10 @@ export const DeliveryPartnersPage: React.FC = () => {
           <button
             key={city}
             onClick={() => setSelectedCity(city)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition shrink-0 ${
-              selectedCity === city ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-800'
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition duration-200 cursor-pointer shrink-0 ${
+              selectedCity === city
+                ? 'bg-whatsapp text-ink-950 font-bold shadow-md'
+                : 'bg-slate-900/60 text-slate-400 border border-slate-850 hover:text-white'
             }`}
           >
             {city}
@@ -106,45 +113,48 @@ export const DeliveryPartnersPage: React.FC = () => {
       </div>
 
       {partners.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
-          <Package className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-sm font-bold text-white mb-1">Aucun livreur disponible</h3>
-          <p className="text-xs text-slate-400">Aucun livreur certifié dans cette zone pour l'instant.</p>
+        <div className="bg-slate-900/40 border border-slate-850 rounded-3xl p-12 text-center">
+          <Package className="w-12 h-12 text-slate-650 mx-auto mb-3" />
+          <h3 className="text-sm font-semibold text-white mb-1">Aucun livreur disponible</h3>
+          <p className="text-xs text-slate-500">Aucun livreur certifié dans cette zone pour l'instant.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {partners.map((partner) => {
             const VehicleIcon = vehicleIcon(partner.vehicleType);
             const displayRating = hoveredRating?.id === partner.id ? hoveredRating.value : Math.round(partner.rating);
 
             return (
-              <div key={partner.id} className="bg-slate-900 border border-emerald-500/20 ring-1 ring-emerald-500/10 rounded-2xl p-4 space-y-3">
-                <div className="flex items-start gap-3">
+              <div
+                key={partner.id}
+                className="card-border hover:border-slate-700/80 rounded-3xl p-5 space-y-4 shadow-panel backdrop-blur-xl transition duration-200"
+              >
+                <div className="flex items-start gap-4">
                   <img
-                    src={partner.avatarUrl || 'https://placehold.co/100x100/1e293b/64748b?text=👤'}
+                    src={partner.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop'}
                     alt={partner.fullName}
                     className="w-14 h-14 rounded-2xl object-cover ring-1 ring-slate-800 shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <h3 className="font-bold text-white text-sm truncate">{partner.fullName}</h3>
+                      <h3 className="font-semibold text-white text-sm truncate">{partner.fullName}</h3>
                       <span title="Certifié" className="inline-flex">
-                        <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <ShieldCheck className="w-4 h-4 text-whatsapp shrink-0" />
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                      <MapPin className="w-3 h-3 text-amber-400" /> {partner.city}
+                    <p className="text-xs text-slate-405 flex items-center gap-1 mt-1">
+                      <MapPin className="w-3.5 h-3.5 text-amber-450" /> {partner.city}
                     </p>
-                    <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                      <VehicleIcon className="w-3 h-3" /> {VEHICLE_LABELS[partner.vehicleType]} • {partner.totalDeliveries} courses
+                    <p className="text-xs text-slate-450 flex items-center gap-1 mt-1">
+                      <VehicleIcon className="w-3.5 h-3.5" /> {VEHICLE_LABELS[partner.vehicleType]} • {partner.totalDeliveries} courses
                     </p>
                   </div>
                 </div>
 
                 {partner.coveredZones.length > 0 && (
-                  <div className="flex items-center gap-1 flex-wrap bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
+                  <div className="flex items-center gap-1.5 flex-wrap bg-slate-950/60 p-3 rounded-2xl border border-slate-850">
                     {partner.coveredZones.map((zone, i) => (
-                      <span key={i} className="bg-slate-900 border border-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded-md">
+                      <span key={i} className="bg-slate-950 border border-slate-850 text-slate-350 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md">
                         {zone}
                       </span>
                     ))}
@@ -153,15 +163,15 @@ export const DeliveryPartnersPage: React.FC = () => {
 
                 {partner.basePrice && (
                   <div className="text-xs">
-                    <span className="text-slate-500">Tarif indicatif : </span>
+                    <span className="text-slate-500 font-medium">Tarif indicatif : </span>
                     <span className="text-white font-bold">{partner.basePrice}</span>
                   </div>
                 )}
 
                 {/* Notation par étoiles */}
-                <div className="flex items-center justify-between pt-2 border-t border-slate-800/60">
+                <div className="flex items-center justify-between pt-2.5 border-t border-slate-800/80">
                   <div
-                    className="flex items-center gap-0.5"
+                    className="flex items-center gap-1"
                     onMouseLeave={() => setHoveredRating(null)}
                   >
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -169,7 +179,7 @@ export const DeliveryPartnersPage: React.FC = () => {
                         key={star}
                         onMouseEnter={() => setHoveredRating({ id: partner.id, value: star })}
                         onClick={() => handleRate(partner.id, star)}
-                        className="p-0.5"
+                        className="p-0.5 cursor-pointer"
                       >
                         <Star
                           className={`w-4 h-4 transition ${
@@ -178,13 +188,13 @@ export const DeliveryPartnersPage: React.FC = () => {
                         />
                       </button>
                     ))}
-                    <span className="text-[11px] text-slate-400 ml-1 font-mono">{partner.rating.toFixed(1)}</span>
+                    <span className="text-xs text-slate-400 ml-1.5 font-mono">{partner.rating.toFixed(1)}</span>
                   </div>
                 </div>
 
                 <button
                   onClick={() => handleContact(partner)}
-                  className="w-full flex items-center justify-center gap-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 border border-emerald-500/30 font-bold text-xs py-2.5 rounded-xl transition"
+                  className="w-full flex items-center justify-center gap-2 bg-whatsapp hover:bg-[#2ee071] text-ink-950 font-bold text-xs py-3 rounded-xl transition cursor-pointer active:translate-y-px"
                 >
                   <MessageSquare className="w-4 h-4" />
                   <span>Contacter sur WhatsApp</span>

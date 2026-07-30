@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { AuthScreen, OtpChannel } from '../../types';
 import { api } from '../../lib/api';
@@ -31,11 +31,12 @@ type ScreenType = AuthScreen | 'reset_password' | 'driver_apply';
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'StatutShopBot';
 
-export const AuthPages: React.FC = () => {
+export const AuthPages = () => {
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
   const [screen, setScreen] = useState<ScreenType>('login');
+
   // 🟢 WhatsApp par défaut
   const [otpChannel, setOtpChannel] = useState<OtpChannel>('whatsapp');
 
@@ -233,37 +234,52 @@ export const AuthPages: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-3 sm:p-4 bg-slate-950 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-3 sm:p-6 bg-ink-950 relative overflow-hidden text-slate-200">
+      {/* Background decorations */}
+      <div className="hairline-grid pointer-events-none absolute inset-0 h-full w-full [mask-image:radial-gradient(50%_50%_at_50%_50%,#000,transparent)] opacity-40" />
+      <div className="pointer-events-none absolute -top-40 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[140px]" />
 
       {/* Toast Notification Error */}
       {toastError && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 bg-red-950/90 border border-red-500/50 text-red-200 text-xs px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 bg-red-900/90 border border-red-500/30 text-white text-xs px-4 py-3.5 rounded-2xl shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
           <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
           <span className="flex-1 font-medium">{toastError}</span>
           <button
             type="button"
             onClick={() => setToastError(null)}
-            className="text-red-400 hover:text-white transition"
+            className="text-red-400 hover:text-white transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden my-4">
-        <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="w-full max-w-md card-border rounded-3xl p-6 sm:p-8 shadow-panel relative overflow-hidden my-4 backdrop-blur-xl">
+        <div className="dotted-grid absolute inset-0 opacity-20 pointer-events-none" />
+
+        {/* Retour à l'accueil */}
+        <div className="flex justify-start mb-5 relative z-10">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Retour au site</span>
+          </button>
+        </div>
 
         {/* Header */}
-        <div className="text-center mb-5 space-y-1.5">
-          <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-bold">
+        <div className="text-center mb-6 space-y-2 relative z-10">
+          <div className="inline-flex items-center gap-1.5 bg-whatsapp/15 border border-whatsapp/20 px-3 py-1 rounded-full text-whatsapp text-xs font-bold font-mono">
             <Sparkles className="w-3.5 h-3.5" /> StatutShop • E-Commerce WhatsApp
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-display font-semibold text-white tracking-tight">
             {screen === 'login' && 'Espace Vendeur'}
             {screen === 'register' && 'Créer ma Boutique'}
             {screen === 'reset_password' && 'Récupération de compte'}
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 leading-relaxed">
             {screen === 'login' && 'Accédez à votre tableau de bord marchand'}
             {screen === 'register' && 'Commencez à recevoir des commandes WhatsApp structurées'}
             {screen === 'reset_password' && 'Réinitialisez votre mot de passe en toute sécurité'}
@@ -272,20 +288,26 @@ export const AuthPages: React.FC = () => {
 
         {/* Switch Navigation (Login / Register) */}
         {screen !== 'reset_password' && (
-          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 mb-6">
+          <div className="flex bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 mb-6 relative z-10">
             <button
               type="button"
               onClick={() => { setScreen('login'); resetFlow(); }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition ${screen === 'login' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
-                }`}
+              className={`flex-1 py-2.5 text-xs font-semibold rounded-lg transition duration-200 cursor-pointer ${
+                screen === 'login'
+                  ? 'bg-whatsapp text-ink-950 shadow-md font-bold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
             >
               Se Connecter
             </button>
             <button
               type="button"
               onClick={() => { setScreen('register'); resetFlow(); }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition ${screen === 'register' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
-                }`}
+              className={`flex-1 py-2.5 text-xs font-semibold rounded-lg transition duration-200 cursor-pointer ${
+                screen === 'register'
+                  ? 'bg-whatsapp text-ink-950 shadow-md font-bold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
             >
               Créer un Compte
             </button>
@@ -294,13 +316,13 @@ export const AuthPages: React.FC = () => {
 
         {/* ----------------- FORMULAIRE DE CONNEXION ----------------- */}
         {screen === 'login' && (
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4 relative z-10">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                 Numéro WhatsApp *
               </label>
               <div className="relative flex items-center">
-                <Phone className="w-4 h-4 text-emerald-400 absolute left-3 pointer-events-none" />
+                <Phone className="w-4 h-4 text-whatsapp absolute left-3 pointer-events-none" />
                 <span className="absolute left-9 text-xs font-mono font-bold text-slate-400 select-none pointer-events-none">
                   +237
                 </span>
@@ -311,33 +333,33 @@ export const AuthPages: React.FC = () => {
                   placeholder="6XX XX XX XX"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl pl-20 pr-3 py-2 text-xs text-white font-mono placeholder-slate-500 outline-none transition"
+                  className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-20 pr-3 py-3 text-sm text-white font-mono placeholder-slate-600 outline-none transition"
                 />
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-xs font-semibold text-slate-300">
                   Mot de passe *
                 </label>
                 <button
                   type="button"
                   onClick={() => { setScreen('reset_password'); resetFlow(); }}
-                  className="text-[11px] text-emerald-400 hover:underline"
+                  className="text-xs text-whatsapp hover:underline cursor-pointer"
                 >
                   Mot de passe oublié ?
                 </button>
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl pl-9 pr-3 py-2 text-xs text-white outline-none transition"
+                  className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-9 pr-3 py-3 text-sm text-white outline-none transition"
                 />
               </div>
             </div>
@@ -345,7 +367,7 @@ export const AuthPages: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg shadow-emerald-950/60 mt-2 disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2 bg-whatsapp hover:bg-[#2ee071] text-ink-950 font-bold text-sm py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-950/60 mt-4 disabled:opacity-60 cursor-pointer active:translate-y-px"
             >
               {isLoading ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
@@ -361,11 +383,11 @@ export const AuthPages: React.FC = () => {
 
         {/* ----------------- FORMULAIRE MOT DE PASSE OUBLIÉ ----------------- */}
         {screen === 'reset_password' && (
-          <div className="space-y-4">
+          <div className="space-y-4 relative z-10">
             <button
               type="button"
               onClick={() => { setScreen('login'); resetFlow(); }}
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition mb-2"
+              className="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition mb-2 cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" /> Retour à la connexion
             </button>
@@ -374,11 +396,11 @@ export const AuthPages: React.FC = () => {
             {resetStep === 'request' && (
               <form onSubmit={handleRequestResetOtp} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                     Votre Numéro WhatsApp lié au compte *
                   </label>
                   <div className="relative flex items-center">
-                    <Phone className="w-4 h-4 text-emerald-400 absolute left-3 pointer-events-none" />
+                    <Phone className="w-4 h-4 text-whatsapp absolute left-3 pointer-events-none" />
                     <span className="absolute left-9 text-xs font-mono font-bold text-slate-400 select-none pointer-events-none">
                       +237
                     </span>
@@ -389,7 +411,7 @@ export const AuthPages: React.FC = () => {
                       placeholder="6XX XX XX XX"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl pl-20 pr-3 py-2 text-xs text-white font-mono placeholder-slate-500 outline-none transition"
+                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-20 pr-3 py-3 text-sm text-white font-mono placeholder-slate-600 outline-none transition"
                     />
                   </div>
                 </div>
@@ -398,25 +420,26 @@ export const AuthPages: React.FC = () => {
                   <label className="block text-xs font-semibold text-slate-300 mb-2">
                     Recevoir le code de réinitialisation via :
                   </label>
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-2 gap-3">
                     {/* WhatsApp */}
                     <button
                       type="button"
                       onClick={() => setOtpChannel('whatsapp')}
-                      className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${otpChannel === 'whatsapp'
-                        ? 'bg-emerald-950/40 border-emerald-500/80 text-white ring-1 ring-emerald-500/30'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                        }`}
+                      className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
+                        otpChannel === 'whatsapp'
+                          ? 'bg-whatsapp/10 border-whatsapp/40 text-white ring-1 ring-whatsapp/20'
+                          : 'bg-slate-950/80 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700'
+                      }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-xl bg-whatsapp/15 text-whatsapp flex items-center justify-center">
                           <MessageSquare className="w-4 h-4" />
                         </div>
-                        {otpChannel === 'whatsapp' && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>}
+                        {otpChannel === 'whatsapp' && <span className="w-2 h-2 rounded-full bg-whatsapp animate-pulse"></span>}
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-white">WhatsApp</p>
-                        <p className="text-[10px] text-emerald-300/80 mt-0.5">Sur votre application</p>
+                        <p className="text-xs font-semibold text-white">WhatsApp</p>
+                        <p className="text-[10px] text-emerald-300/80 mt-0.5 font-mono">Sur votre application</p>
                       </div>
                     </button>
 
@@ -424,10 +447,11 @@ export const AuthPages: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setOtpChannel('telegram')}
-                      className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${otpChannel === 'telegram'
-                        ? 'bg-sky-950/40 border-sky-500/80 text-white ring-1 ring-sky-500/30'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                        }`}
+                      className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
+                        otpChannel === 'telegram'
+                          ? 'bg-sky-500/10 border-sky-500/40 text-white ring-1 ring-sky-500/20'
+                          : 'bg-slate-950/80 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700'
+                      }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
@@ -436,8 +460,8 @@ export const AuthPages: React.FC = () => {
                         {otpChannel === 'telegram' && <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>}
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-white">Telegram</p>
-                        <p className="text-[10px] text-sky-300/80 mt-0.5">Sur le Bot</p>
+                        <p className="text-xs font-semibold text-white">Telegram</p>
+                        <p className="text-[10px] text-sky-300/80 mt-0.5 font-mono">Sur le Bot</p>
                       </div>
                     </button>
                   </div>
@@ -446,7 +470,7 @@ export const AuthPages: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg shadow-emerald-950/60 disabled:opacity-60 mt-2"
+                  className="w-full flex items-center justify-center gap-2 bg-whatsapp hover:bg-[#2ee071] text-ink-950 font-bold text-sm py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-950/60 disabled:opacity-60 mt-4 cursor-pointer active:translate-y-px"
                 >
                   {isLoading ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
@@ -463,12 +487,12 @@ export const AuthPages: React.FC = () => {
             {/* ÉTAPE 2 : NOUVEAU MOT DE PASSE + CONFIRMATION OTP */}
             {resetStep === 'verify' && (
               <form onSubmit={handleResetPasswordConfirm} className="space-y-4">
-                <div className="p-3 bg-emerald-950/30 border border-emerald-800/50 rounded-xl text-xs text-emerald-300">
+                <div className="p-3.5 bg-whatsapp/10 border border-whatsapp/20 rounded-xl text-xs text-emerald-300">
                   Code OTP envoyé avec succès à <span className="font-mono font-bold text-white">+237 {phone}</span>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                     Code OTP (6 chiffres) *
                   </label>
                   <input
@@ -478,23 +502,23 @@ export const AuthPages: React.FC = () => {
                     placeholder="000000"
                     value={enteredOtp}
                     onChange={(e) => setEnteredOtp(e.target.value)}
-                    className="w-full bg-slate-950 border border-emerald-500/80 focus:border-emerald-400 rounded-xl px-3 py-2 text-center text-lg font-mono font-black text-white tracking-widest outline-none shadow-inner"
+                    className="w-full bg-slate-950/80 border border-whatsapp/50 focus:border-whatsapp rounded-xl px-3 py-3.5 text-center text-xl font-mono font-bold text-white tracking-widest outline-none shadow-inner focus:ring-1 focus:ring-whatsapp/30"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                     Nouveau Mot de passe *
                   </label>
                   <div className="relative">
-                    <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                    <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
                     <input
                       type="password"
                       required
                       placeholder="••••••••"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl pl-9 pr-3 py-2 text-xs text-white outline-none transition"
+                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-9 pr-3 py-3 text-sm text-white outline-none transition"
                     />
                   </div>
                 </div>
@@ -502,7 +526,7 @@ export const AuthPages: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg shadow-emerald-950/60 disabled:opacity-60"
+                  className="w-full flex items-center justify-center gap-2 bg-whatsapp hover:bg-[#2ee071] text-ink-950 font-bold text-sm py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-950/60 disabled:opacity-60 cursor-pointer active:translate-y-px"
                 >
                   {isLoading ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
@@ -520,32 +544,32 @@ export const AuthPages: React.FC = () => {
 
         {/* ----------------- FORMULAIRE D'INSCRIPTION ----------------- */}
         {screen === 'register' && (
-          <div className="space-y-4">
+          <div className="space-y-4 relative z-10">
             {registerStep === 'form' && (
               <form onSubmit={handleProceedRegister} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                     Nom de votre boutique *
                   </label>
                   <div className="relative">
-                    <Store className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                    <Store className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
                     <input
                       type="text"
                       required
                       placeholder="ex: StatutShop Douala, Chic & Mode..."
                       value={storeName}
                       onChange={(e) => setStoreName(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition"
+                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-9 pr-3 py-3 text-sm text-white placeholder-slate-600 outline-none transition"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                     Numéro WhatsApp *
                   </label>
                   <div className="relative flex items-center">
-                    <Phone className="w-4 h-4 text-emerald-400 absolute left-3 pointer-events-none" />
+                    <Phone className="w-4 h-4 text-whatsapp absolute left-3 pointer-events-none" />
                     <span className="absolute left-9 text-xs font-mono font-bold text-slate-400 select-none pointer-events-none">
                       +237
                     </span>
@@ -556,24 +580,24 @@ export const AuthPages: React.FC = () => {
                       placeholder="6XX XX XX XX"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl pl-20 pr-3 py-2 text-xs text-white font-mono placeholder-slate-500 outline-none transition"
+                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-20 pr-3 py-3 text-sm text-white font-mono placeholder-slate-600 outline-none transition"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                     Définir un Mot de passe *
                   </label>
                   <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                    <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
                     <input
                       type="password"
                       required
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl pl-9 pr-3 py-2 text-xs text-white outline-none transition"
+                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-9 pr-3 py-3 text-sm text-white outline-none transition"
                     />
                   </div>
                 </div>
@@ -582,25 +606,26 @@ export const AuthPages: React.FC = () => {
                   <label className="block text-xs font-semibold text-slate-300 mb-2">
                     Canal de réception du code OTP :
                   </label>
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-2 gap-3">
                     {/* Option WhatsApp Direct */}
                     <button
                       type="button"
                       onClick={() => setOtpChannel('whatsapp')}
-                      className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${otpChannel === 'whatsapp'
-                        ? 'bg-emerald-950/40 border-emerald-500/80 text-white ring-1 ring-emerald-500/30'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                        }`}
+                      className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
+                        otpChannel === 'whatsapp'
+                          ? 'bg-whatsapp/10 border-whatsapp/40 text-white ring-1 ring-whatsapp/20'
+                          : 'bg-slate-950/80 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700'
+                      }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-xl bg-whatsapp/15 text-whatsapp flex items-center justify-center">
                           <MessageSquare className="w-4 h-4" />
                         </div>
-                        {otpChannel === 'whatsapp' && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>}
+                        {otpChannel === 'whatsapp' && <span className="w-2 h-2 rounded-full bg-whatsapp animate-pulse"></span>}
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-white">WhatsApp Direct</p>
-                        <p className="text-[10px] text-emerald-300/80 mt-0.5">Instant & Gratuit</p>
+                        <p className="text-xs font-semibold text-white">WhatsApp Direct</p>
+                        <p className="text-[10px] text-emerald-300/80 mt-0.5 font-mono">Instant & Gratuit</p>
                       </div>
                     </button>
 
@@ -608,10 +633,11 @@ export const AuthPages: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setOtpChannel('telegram')}
-                      className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${otpChannel === 'telegram'
-                        ? 'bg-sky-950/40 border-sky-500/80 text-white ring-1 ring-sky-500/30'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                        }`}
+                      className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
+                        otpChannel === 'telegram'
+                          ? 'bg-sky-500/10 border-sky-500/40 text-white ring-1 ring-sky-500/20'
+                          : 'bg-slate-950/80 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700'
+                      }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
@@ -620,8 +646,8 @@ export const AuthPages: React.FC = () => {
                         {otpChannel === 'telegram' && <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>}
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-white">Telegram Bot</p>
-                        <p className="text-[10px] text-sky-300/80 mt-0.5">Instant & Gratuit</p>
+                        <p className="text-xs font-semibold text-white">Telegram Bot</p>
+                        <p className="text-[10px] text-sky-300/80 mt-0.5 font-mono">Instant & Gratuit</p>
                       </div>
                     </button>
                   </div>
@@ -630,10 +656,11 @@ export const AuthPages: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full flex items-center justify-center gap-2 font-bold text-xs py-3 rounded-xl transition shadow-lg mt-2 text-white disabled:opacity-60 ${otpChannel === 'telegram'
-                    ? 'bg-sky-600 hover:bg-sky-500 shadow-sky-950/60'
-                    : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/60'
-                    }`}
+                  className={`w-full flex items-center justify-center gap-2 font-bold text-sm py-3.5 rounded-xl transition shadow-lg mt-4 text-white disabled:opacity-60 cursor-pointer active:translate-y-px ${
+                    otpChannel === 'telegram'
+                      ? 'bg-sky-500 hover:bg-sky-400 shadow-sky-950/60'
+                      : 'bg-whatsapp hover:bg-[#2ee071] text-ink-950 shadow-emerald-950/60'
+                  }`}
                 >
                   {isLoading ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
@@ -658,18 +685,18 @@ export const AuthPages: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setRegisterStep('form')}
-                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition"
+                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" /> Modifier mes informations
                 </button>
 
-                <div className="bg-sky-950/40 border border-sky-800/50 rounded-2xl p-4 text-center space-y-3">
+                <div className="bg-sky-950/40 border border-sky-850 rounded-2xl p-4 text-center space-y-3">
                   <div className="w-12 h-12 bg-sky-500/20 text-sky-400 rounded-2xl mx-auto flex items-center justify-center ring-4 ring-sky-500/10">
                     <Bot className="w-6 h-6" />
                   </div>
 
                   <div>
-                    <h3 className="font-bold text-white text-sm">Étape 1/2 : Activez le Bot Telegram</h3>
+                    <h3 className="font-semibold text-white text-sm">Étape 1/2 : Activez le Bot Telegram</h3>
                     <p className="text-xs text-sky-200/80 mt-1">
                       Liez votre numéro avec <span className="font-mono text-sky-300">@{BOT_USERNAME}</span> pour recevoir votre code OTP.
                     </p>
@@ -679,7 +706,7 @@ export const AuthPages: React.FC = () => {
                     href={telegramLinkFromApi || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs py-3 px-4 rounded-xl transition shadow-lg shadow-sky-950/80"
+                    className="w-full flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs py-3 px-4 rounded-xl transition shadow-lg shadow-sky-950/80 cursor-pointer"
                   >
                     <Send className="w-4 h-4" />
                     <span>Lier avec @{BOT_USERNAME}</span>
@@ -691,7 +718,7 @@ export const AuthPages: React.FC = () => {
                   type="button"
                   onClick={() => sendOtpRequest('register')}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg shadow-emerald-950/60 disabled:opacity-60"
+                  className="w-full flex items-center justify-center gap-2 bg-whatsapp hover:bg-[#2ee071] text-ink-950 font-bold text-sm py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-950/60 disabled:opacity-60 cursor-pointer active:translate-y-px"
                 >
                   {isLoading ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
@@ -711,15 +738,16 @@ export const AuthPages: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setRegisterStep(otpChannel === 'telegram' ? 'telegram_link' : 'form')}
-                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition"
+                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" /> Retour
                 </button>
 
-                <div className={`p-4 rounded-2xl border space-y-2 ${otpChannel === 'telegram'
-                  ? 'bg-sky-950/40 border-sky-800/60 text-sky-200'
-                  : 'bg-emerald-950/40 border-emerald-800/60 text-emerald-200'
-                  }`}>
+                <div className={`p-4 rounded-2xl border space-y-2 ${
+                  otpChannel === 'telegram'
+                    ? 'bg-sky-500/10 border-sky-500/30 text-sky-200'
+                    : 'bg-whatsapp/10 border-whatsapp/20 text-emerald-200'
+                }`}>
                   <div className="flex items-center gap-2 text-xs font-bold text-white">
                     {otpChannel === 'telegram' ? (
                       <>
@@ -728,7 +756,7 @@ export const AuthPages: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <MessageSquare className="w-4 h-4 text-emerald-400" />
+                        <MessageSquare className="w-4 h-4 text-whatsapp" />
                         <span>Code envoyé sur WhatsApp</span>
                       </>
                     )}
@@ -739,7 +767,7 @@ export const AuthPages: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1 text-center">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 text-center">
                     Entrez le code OTP à 6 chiffres :
                   </label>
                   <input
@@ -749,14 +777,14 @@ export const AuthPages: React.FC = () => {
                     placeholder="000000"
                     value={enteredOtp}
                     onChange={(e) => setEnteredOtp(e.target.value)}
-                    className="w-full bg-slate-950 border border-emerald-500/80 focus:border-emerald-400 rounded-xl px-3 py-3 text-center text-xl font-mono font-black text-white tracking-widest outline-none shadow-inner"
+                    className="w-full bg-slate-950/80 border border-whatsapp/50 focus:border-whatsapp rounded-xl px-3 py-3.5 text-center text-xl font-mono font-bold text-white tracking-widest outline-none shadow-inner focus:ring-1 focus:ring-whatsapp/30"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg shadow-emerald-950/60 disabled:opacity-60"
+                  className="w-full flex items-center justify-center gap-2 bg-whatsapp hover:bg-[#2ee071] text-ink-950 font-bold text-sm py-3.5 rounded-xl transition shadow-lg shadow-emerald-950/60 disabled:opacity-60 cursor-pointer active:translate-y-px"
                 >
                   {isLoading ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
@@ -773,26 +801,26 @@ export const AuthPages: React.FC = () => {
         )}
 
         {/* Footer info */}
-        <div className="mt-6 pt-5 border-t border-slate-800 space-y-3 text-[11px] text-slate-400">
+        <div className="mt-6 pt-5 border-t border-slate-800/80 space-y-3.5 text-[11px] text-slate-400 relative z-10">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+            <ShieldCheck className="w-4 h-4 text-whatsapp shrink-0" />
             <span>Sécurité renforcée par Telegram Bot &amp; SMS OTP.</span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-whatsapp shrink-0" />
             <span>Redirection directe vers votre numéro WhatsApp personnel.</span>
           </div>
 
           {/* Lien Livreur */}
-          <div className="pt-1">
+          <div className="pt-2">
             <button
               type="button"
               onClick={() => { setScreen('driver_apply'); resetFlow(); }}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-amber-500/30 bg-amber-500/8 hover:bg-amber-500/15 text-amber-400 text-[11px] font-bold transition group"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-400 hover:text-amber-300 text-xs font-bold transition group cursor-pointer"
             >
-              <Truck className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              <Truck className="w-4 h-4 group-hover:scale-110 transition-transform" />
               <span>Je veux devenir Livreur Partenaire</span>
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

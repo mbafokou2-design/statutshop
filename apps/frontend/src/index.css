@@ -2,9 +2,91 @@
 
 @theme {
   --color-slate-950: #020617;
+  --color-ink-950: #020617;
+  --color-ink-900: #0b1220;
+  --color-ink-800: #0f172a;
+  --color-whatsapp: #25d366;
+  --color-whatsapp-dark: #1ea952;
+  --color-whatsapp-soft: rgba(37, 211, 102, 0.12);
+  
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Inter Tight', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+:root {
+  --bg: #020617;
+  --whatsapp: #25d366;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
 }
 
 body {
+  background-color: var(--bg);
+  color: #e2e8f0;
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: #020617;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(37, 211, 102, 0.28);
+  color: #ffffff;
+}
+
+/* Thin hairline grid used behind a few sections */
+.hairline-grid {
+  background-image: linear-gradient(
+      to right,
+      rgba(148, 163, 184, 0.06) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+.dotted-grid {
+  background-image: radial-gradient(
+    rgba(148, 163, 184, 0.14) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+}
+
+/* Soft one-off glow, used sparingly (not a page-wide gradient) */
+.green-glow {
+  box-shadow: 0 0 0 1px rgba(37, 211, 102, 0.18),
+    0 18px 60px -20px rgba(16, 185, 129, 0.45);
+}
+
+.card-border {
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background-color: rgba(15, 23, 42, 0.5);
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(37, 211, 102, 0.8);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 999px;
+  border: 3px solid #020617;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ProductCatalog } from '../components/products/ProductCatalog';
 import { ToastContainer, type ToastMessage } from '../components/ToastContainer';
 import type { Product } from '../types';
@@ -12,7 +12,7 @@ import {
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { OfflineState } from '../components/ui/OfflineState';
 
-export const ProductsPage: React.FC = () => {
+export const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -97,7 +97,7 @@ export const ProductsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-3 sm:p-6">
+    <div className="min-h-screen bg-ink-950 text-slate-200 p-3 sm:p-6">
       <ProductCatalog
         products={products}
         onAddProduct={handleAddProduct}

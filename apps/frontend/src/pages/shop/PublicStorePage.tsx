@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ClientStorefront } from './ClientStorefront';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -10,7 +10,7 @@ import { fetchPublicStore, submitPublicOrder } from '../../services/publicShop.s
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../lib/api';
 
-export const PublicStorePage: React.FC = () => {
+export const PublicStorePage = () => {
   const { storeSlug } = useParams<{ storeSlug: string }>();
   const { user } = useAuth();
   const [vendeur, setVendeur] = useState<StoreSettings | null>(null);
@@ -70,7 +70,7 @@ export const PublicStorePage: React.FC = () => {
   if (status === 'error') return <OfflineState onRetry={load} />;
   if (status === 'notfound' || !vendeur) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-ink-950 flex items-center justify-center p-4">
         <p className="text-slate-400 text-sm">Boutique introuvable.</p>
       </div>
     );
