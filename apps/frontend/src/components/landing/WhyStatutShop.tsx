@@ -86,6 +86,7 @@ export function WhyStatutShop() {
               ratio="9 / 17"
               className="rounded-[26px]"
               compact
+              imageUrl="/block.jpg"
             />
           </div>
         </div>

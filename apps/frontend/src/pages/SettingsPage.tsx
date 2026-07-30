@@ -207,10 +207,10 @@ export const SettingsPage = () => {
 
       <button
         onClick={() => window.open(`/shop/${settings.storeSlug}`, '_blank')}
-        className="w-full flex items-center justify-center gap-2 bg-slate-900/40 hover:bg-slate-900 border border-slate-800/80 text-slate-200 font-bold text-xs py-3.5 rounded-xl transition cursor-pointer active:translate-y-px"
+        className="w-full flex items-center justify-center gap-2 bg-slate-900/40 hover:bg-slate-900 border border-slate-800/80 text-slate-200 font-semibold text-xs py-3.5 rounded-xl transition cursor-pointer active:translate-y-px"
       >
         <Eye className="w-4 h-4 text-whatsapp" />
-        <span>Voir ma boutique publique</span>
+        <span>Lien de ma boutique StatutShop en direct</span>
       </button>
 
       {/* Formulaire infos boutique */}

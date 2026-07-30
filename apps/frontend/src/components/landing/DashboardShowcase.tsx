@@ -11,12 +11,12 @@ export function DashboardShowcase() {
               Aperçu
             </p>
             <h2 className="mt-4 font-display text-[30px] font-semibold leading-tight tracking-[-0.025em] text-white sm:text-[38px]">
-              Votre boutique, vue de l’intérieur.
+              Votre vitrine de vente, en direct sur WhatsApp.
             </h2>
           </div>
           <p className="max-w-sm text-[14.5px] leading-relaxed text-slate-400">
-            Un espace unique pour vos produits, vos commandes et vos clients —
-            accessible depuis le téléphone que vous avez déjà en main.
+            Partagez votre lien de boutique StatutShop en direct à vos clients.
+            Ils commandent en un clic et vous recevez les commandes directement dans votre WhatsApp.
           </p>
         </div>
 
@@ -43,7 +43,7 @@ export function DashboardShowcase() {
             <Placeholder
               label="Espace d'Administration StatutShop"
               hint="Statistiques de vente, liste des produits et suivi des commandes."
-              ratio="16 / 9"
+              
               imageUrl="/stat.png"
             />
           </div>

@@ -333,7 +333,7 @@ export const AuthPages = () => {
                   placeholder="6XX XX XX XX"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                  className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-20 pr-3 py-3 text-sm text-white font-mono placeholder-slate-600 outline-none transition"
+                  className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl pl-20 pr-3 py-3 text-sm text-white font-mono placeholder-slate-650 outline-none transition"
                 />
               </div>
             </div>
@@ -359,7 +359,7 @@ export const AuthPages = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-9 pr-3 py-3 text-sm text-white outline-none transition"
+                  className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl pl-9 pr-3 py-3 text-sm text-white outline-none transition"
                 />
               </div>
             </div>
@@ -411,7 +411,7 @@ export const AuthPages = () => {
                       placeholder="6XX XX XX XX"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-20 pr-3 py-3 text-sm text-white font-mono placeholder-slate-600 outline-none transition"
+                      className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl pl-20 pr-3 py-3 text-sm text-white font-mono placeholder-slate-650 outline-none transition"
                     />
                   </div>
                 </div>
@@ -427,8 +427,8 @@ export const AuthPages = () => {
                       onClick={() => setOtpChannel('whatsapp')}
                       className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
                         otpChannel === 'whatsapp'
-                          ? 'bg-whatsapp/10 border-whatsapp/40 text-white ring-1 ring-whatsapp/20'
-                          : 'bg-slate-950/80 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700'
+                          ? 'bg-whatsapp/10 border-whatsapp/30 text-white ring-1 ring-whatsapp/10'
+                          : 'bg-slate-950/85 border-slate-900/85 text-slate-450 hover:text-white hover:border-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -449,8 +449,8 @@ export const AuthPages = () => {
                       onClick={() => setOtpChannel('telegram')}
                       className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
                         otpChannel === 'telegram'
-                          ? 'bg-sky-500/10 border-sky-500/40 text-white ring-1 ring-sky-500/20'
-                          : 'bg-slate-950/80 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700'
+                          ? 'bg-sky-500/10 border-sky-500/30 text-white ring-1 ring-sky-500/10'
+                          : 'bg-slate-950/85 border-slate-900/85 text-slate-450 hover:text-white hover:border-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -518,7 +518,7 @@ export const AuthPages = () => {
                       placeholder="••••••••"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-9 pr-3 py-3 text-sm text-white outline-none transition"
+                      className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl pl-9 pr-3 py-3 text-sm text-white outline-none transition"
                     />
                   </div>
                 </div>
@@ -559,7 +559,7 @@ export const AuthPages = () => {
                       placeholder="ex: StatutShop Douala, Chic & Mode..."
                       value={storeName}
                       onChange={(e) => setStoreName(e.target.value)}
-                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-9 pr-3 py-3 text-sm text-white placeholder-slate-600 outline-none transition"
+                      className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl pl-9 pr-3 py-3 text-sm text-white placeholder-slate-650 outline-none transition"
                     />
                   </div>
                 </div>
@@ -580,7 +580,7 @@ export const AuthPages = () => {
                       placeholder="6XX XX XX XX"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-20 pr-3 py-3 text-sm text-white font-mono placeholder-slate-600 outline-none transition"
+                      className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl pl-20 pr-3 py-3 text-sm text-white font-mono placeholder-slate-650 outline-none transition"
                     />
                   </div>
                 </div>
@@ -597,7 +597,7 @@ export const AuthPages = () => {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full bg-slate-950/80 border border-slate-800/80 focus:border-whatsapp focus:ring-1 focus:ring-whatsapp/30 rounded-xl pl-9 pr-3 py-3 text-sm text-white outline-none transition"
+                      className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl pl-9 pr-3 py-3 text-sm text-white outline-none transition"
                     />
                   </div>
                 </div>
@@ -613,8 +613,8 @@ export const AuthPages = () => {
                       onClick={() => setOtpChannel('whatsapp')}
                       className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
                         otpChannel === 'whatsapp'
-                          ? 'bg-whatsapp/10 border-whatsapp/40 text-white ring-1 ring-whatsapp/20'
-                          : 'bg-slate-950/80 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700'
+                          ? 'bg-whatsapp/10 border-whatsapp/30 text-white ring-1 ring-whatsapp/10'
+                          : 'bg-slate-950/85 border-slate-900/85 text-slate-455 hover:text-white hover:border-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -635,8 +635,8 @@ export const AuthPages = () => {
                       onClick={() => setOtpChannel('telegram')}
                       className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
                         otpChannel === 'telegram'
-                          ? 'bg-sky-500/10 border-sky-500/40 text-white ring-1 ring-sky-500/20'
-                          : 'bg-slate-950/80 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700'
+                          ? 'bg-sky-500/10 border-sky-500/30 text-white ring-1 ring-sky-500/10'
+                          : 'bg-slate-950/85 border-slate-900/85 text-slate-455 hover:text-white hover:border-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -777,7 +777,7 @@ export const AuthPages = () => {
                     placeholder="000000"
                     value={enteredOtp}
                     onChange={(e) => setEnteredOtp(e.target.value)}
-                    className="w-full bg-slate-950/80 border border-whatsapp/50 focus:border-whatsapp rounded-xl px-3 py-3.5 text-center text-xl font-mono font-bold text-white tracking-widest outline-none shadow-inner focus:ring-1 focus:ring-whatsapp/30"
+                    className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl px-3 py-3.5 text-center text-xl font-mono font-bold text-white tracking-widest outline-none shadow-inner"
                   />
                 </div>
 

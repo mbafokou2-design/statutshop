@@ -23,14 +23,11 @@ export function Placeholder({
 }: PlaceholderProps) {
   if (imageUrl) {
     return (
-      <div
-        className={`relative overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950 ${className}`}
-        style={{ aspectRatio: ratio }}
-      >
+      <div className={`relative overflow-hidden rounded-2xl border border-slate-900 bg-ink-950 ${className}`}>
         <img
           src={imageUrl}
           alt={label}
-          className="w-full h-full object-cover"
+          className="w-full h-auto block"
         />
       </div>
     )

@@ -2,6 +2,9 @@
 
 @theme {
   --color-slate-950: #020617;
+  --color-slate-900: #0f172a;
+  --color-slate-850: #131d31;
+  --color-slate-855: #131d31;
   --color-ink-950: #020617;
   --color-ink-900: #0b1220;
   --color-ink-800: #0f172a;
@@ -62,8 +65,8 @@ body {
 }
 
 .card-border {
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  background-color: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(30, 41, 59, 0.45);
+  background-color: rgba(11, 18, 32, 0.55);
 }
 
 *:focus-visible {

@@ -93,7 +93,7 @@ export const DashboardHome = () => {
             <Store className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-white">Voir ma boutique publique</p>
+            <p className="text-xs font-semibold text-white">Lien direct de ma boutique StatutShop sur WhatsApp</p>
             <p className="text-xs text-whatsapp/80 font-mono truncate mt-0.5">/shop/{user?.storeSlug}</p>
           </div>
         </div>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
 export interface ToastMessage {
@@ -12,7 +11,7 @@ interface ToastProps {
   onDismiss: (id: string) => void;
 }
 
-export const ToastContainer: React.FC<ToastProps> = ({ toasts, onDismiss }) => {
+export const ToastContainer = ({ toasts, onDismiss }: ToastProps) => {
   if (toasts.length === 0) return null;
 
   return (
@@ -20,22 +19,25 @@ export const ToastContainer: React.FC<ToastProps> = ({ toasts, onDismiss }) => {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`pointer-events-auto flex items-center justify-between p-3.5 rounded-xl shadow-xl border text-xs font-medium transition-all duration-200 ${
+          className={`pointer-events-auto flex items-center justify-between p-4 rounded-2xl shadow-panel border text-xs font-semibold backdrop-blur-xl transition-all duration-200 ${
             toast.type === 'success'
-              ? 'bg-slate-900 border-emerald-500/50 text-white'
+              ? 'bg-ink-950/90 border-whatsapp/30 text-slate-200'
               : toast.type === 'error'
-              ? 'bg-slate-900 border-rose-500/50 text-white'
-              : 'bg-slate-900 border-slate-700 text-white'
+              ? 'bg-ink-950/90 border-rose-500/30 text-slate-200'
+              : 'bg-ink-950/90 border-slate-800/80 text-slate-200'
           }`}
         >
-          <div className="flex items-center gap-2.5">
-            {toast.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
-            {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />}
+          <div className="flex items-center gap-3">
+            {toast.type === 'success' && <CheckCircle2 className="w-4 h-4 text-whatsapp shrink-0" />}
+            {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-405 shrink-0" />}
             {toast.type === 'info' && <Info className="w-4 h-4 text-sky-400 shrink-0" />}
-            <span>{toast.text}</span>
+            <span className="leading-snug">{toast.text}</span>
           </div>
-          <button onClick={() => onDismiss(toast.id)} className="text-slate-400 hover:text-white p-1 rounded-md ml-2">
-            <X className="w-3.5 h-3.5" />
+          <button
+            onClick={() => onDismiss(toast.id)}
+            className="text-slate-505 hover:text-white p-1 rounded-lg ml-2 cursor-pointer transition duration-150"
+          >
+            <X className="w-4 h-4" />
           </button>
         </div>
       ))}
