@@ -6,7 +6,7 @@ import { prisma } from '../lib/prisma';
 let analyticsDataClient: BetaAnalyticsDataClient | null = null;
 
 try {
-  const keyPath = path.join(__dirname, '../../google-service-account.json');
+  const keyPath = path.join(process.cwd(), 'google-service-account.json');
   analyticsDataClient = new BetaAnalyticsDataClient({
     keyFilename: keyPath,
   });

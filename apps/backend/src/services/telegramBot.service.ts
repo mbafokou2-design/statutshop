@@ -2,7 +2,21 @@ import TelegramBot from 'node-telegram-bot-api';
 import { prisma } from '../lib/prisma';
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN as string;
-export const bot = new TelegramBot(TOKEN, { polling: true });
+const isProd = process.env.NODE_ENV === 'production';
+const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL || (isProd ? 'https://lavenderblush-crocodile-481124.hostingersite.com/api/v1/telegram-webhook' : '');
+
+export const bot = new TelegramBot(TOKEN, {
+  polling: !webhookUrl as any
+});
+
+if (webhookUrl) {
+  bot.setWebHook(webhookUrl)
+    .then(() => console.log(`[Telegram] Webhook set to ${webhookUrl}`))
+    .catch((err) => console.error('[Telegram] Error setting webhook:', err));
+} else {
+  console.log('[Telegram] Polling enabled for updates');
+}
+
 
 bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
   const chatId = msg.chat.id.toString();

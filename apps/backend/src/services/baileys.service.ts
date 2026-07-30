@@ -162,3 +162,21 @@ export async function sendRelanceMessage(vendeurId: string, customerPhone: strin
   const jid = customerPhone.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
   await sock.sendMessage(jid, { text: message });
 }
+
+export async function restoreWhatsAppSessions() {
+  try {
+    const sessions = await prisma.whatsAppSession.findMany({
+      where: { isConnected: true }
+    });
+    console.log(`[WhatsApp] Restoring ${sessions.length} sessions...`);
+    for (const session of sessions) {
+      if (session.phoneNumber) {
+        startWhatsAppConnection(session.vendeurId, session.phoneNumber).catch((err) => {
+          console.error(`❌ Erreur lors de la reconnexion automatique du vendeur ${session.vendeurId}:`, err);
+        });
+      }
+    }
+  } catch (error) {
+    console.error('[WhatsApp] Erreur lors de la restauration des sessions WhatsApp:', error);
+  }
+}

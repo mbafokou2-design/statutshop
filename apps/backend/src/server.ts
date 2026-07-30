@@ -6,7 +6,8 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
 import productRoutes from './routes/product.routes';
 import publicShopRoutes from './routes/publicShop.routes';
-import './services/telegramBot.service';
+import { bot } from './services/telegramBot.service';
+import { restoreWhatsAppSessions } from './services/baileys.service';
 import settingsRoutes from './routes/settings.routes';
 import deliveryPartnerRoutes from './routes/deliveryPartner.routes';
 import analyticsRoutes from './routes/analytics.routes';
@@ -24,7 +25,7 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || 'https://moccasin-armadillo-648936.hostingersite.com',
     credentials: true,
   })
 );
@@ -44,11 +45,16 @@ app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/settings', settingsRoutes);
 app.use('/api/v1/delivery-partners', deliveryPartnerRoutes);
 app.use('/api/v1/analytics', analyticsRoutes); // Pour Google Analytics / Trafic web
-app.use('/api/v1/finance', financeRoutes); 
+app.use('/api/v1/finance', financeRoutes);
 app.use('/api/v1/whatsapp', whatsappRoutes);    // Pour les données financières & bénéfices
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/delivery-candidates', deliveryCandidateRoutes);
+
+app.post('/api/v1/telegram-webhook', (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
 
 app.get('/api/v1/health', (req, res) => {
   res.json({ status: 'ok', message: 'StatutShop API is running' });
@@ -56,4 +62,5 @@ app.get('/api/v1/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`✅ StatutShop backend running on http://localhost:${PORT}`);
+  restoreWhatsAppSessions();
 });
