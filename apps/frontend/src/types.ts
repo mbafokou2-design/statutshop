@@ -170,6 +170,7 @@ export interface AdminShop {
   storeName: string;
   storeSlug: string;
   phone: string;
+  email?: string | null;
   city: string;
   neighborhood: string;
   isActive: boolean;

@@ -1,15 +1,28 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, Play, ShoppingBag } from 'lucide-react'
+import { ArrowRight, Play, ShoppingBag, Loader2 } from 'lucide-react'
 import { Placeholder } from './Placeholder'
 
 type HeroProps = {
-  shopsCount: number
+  shopsCount: number | null
+  isLoadingShopsCount?: boolean
   onAuthClick: () => void
 }
 
-export function Hero({ shopsCount, onAuthClick }: HeroProps) {
+export function Hero({ shopsCount, isLoadingShopsCount, onAuthClick }: HeroProps) {
+  const renderShopsCountValue = () => {
+    if (isLoadingShopsCount) {
+      return (
+        <span className="inline-flex items-center gap-2 text-whatsapp">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="text-xs text-slate-400 font-sans font-normal">chargement…</span>
+        </span>
+      );
+    }
+    return `+${shopsCount ?? 0}`;
+  };
+
   const statsList = [
-    { value: `+${shopsCount}`, label: 'boutiques créées' },
+    { value: renderShopsCountValue(), label: 'boutiques créées' },
     { value: '0 FCFA', label: 'de commission' },
     { value: '100%', label: 'sur WhatsApp' },
   ]

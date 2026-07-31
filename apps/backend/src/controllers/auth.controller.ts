@@ -58,14 +58,9 @@ export async function handleRequestOtp(req: Request, res: Response) {
   // Vérification de l'existence de l'utilisateur
   if (isEmail(otpTarget)) {
     const existingUser = await prisma.user.findUnique({ where: { email: otpTarget } });
-    if (mode === 'register' && existingUser) {
-      return res.status(409).json({
-        error: 'Un compte StatutShop existe déjà avec cette adresse e-mail. Veuillez vous connecter.',
-      });
-    }
     if ((mode === 'login' || mode === 'reset_password') && !existingUser) {
       return res.status(404).json({
-        error: "Aucun compte StatutShop trouvé pour cette adresse e-mail.",
+        error: "Vous n'avez pas de compte enregistré avec cette adresse e-mail dans StatutShop.",
       });
     }
   } else {
@@ -77,24 +72,17 @@ export async function handleRequestOtp(req: Request, res: Response) {
     }
     if ((mode === 'login' || mode === 'reset_password') && !existingUser) {
       return res.status(404).json({
-        error: "Aucun compte StatutShop trouvé pour ce numéro.",
+        error: "Aucun compte StatutShop trouvé pour ce numéro de téléphone.",
       });
     }
   }
 
-  // Vérification croisée lors de l'inscription (vérifier téléphone et email en même temps)
-  if (mode === 'register' && phone && email) {
+  // Vérification croisée lors de l'inscription (Vérification strictement basée sur le numéro de téléphone)
+  if (mode === 'register' && phone) {
     const formattedPhone = formatPhoneNumber(phone);
-    const normalizedEmail = email.toLowerCase().trim();
-
     const existingPhone = await prisma.user.findUnique({ where: { phone: formattedPhone } });
     if (existingPhone) {
       return res.status(409).json({ error: 'Un compte StatutShop existe déjà avec ce numéro WhatsApp.' });
-    }
-
-    const existingEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-    if (existingEmail) {
-      return res.status(409).json({ error: 'Un compte StatutShop existe déjà avec cette adresse e-mail.' });
     }
   }
 
@@ -114,7 +102,7 @@ export async function handleRequestOtp(req: Request, res: Response) {
       const telegramLink = `https://t.me/${botUsername}?start=${cleanPhone}`;
 
       return res.status(400).json({
-        error: err.message,
+        error: "Votre compte existe sur StatutShop mais votre numéro n'est pas encore lié au Bot Telegram.",
         telegramLink,
       });
     }
@@ -316,11 +304,6 @@ export async function handleRegister(req: Request, res: Response) {
   const existingPhone = await prisma.user.findUnique({ where: { phone } });
   if (existingPhone) {
     return res.status(409).json({ error: 'Ce numéro de téléphone est déjà enregistré.' });
-  }
-
-  const existingEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-  if (existingEmail) {
-    return res.status(409).json({ error: 'Cette adresse e-mail est déjà enregistrée.' });
   }
 
   const passwordHash = await argon2.hash(password);

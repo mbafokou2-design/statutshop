@@ -17,7 +17,8 @@ import { Footer } from '../components/landing/Footer';
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [shopsCount, setShopsCount] = useState<number>(1200);
+  const [shopsCount, setShopsCount] = useState<number | null>(null);
+  const [isLoadingShopsCount, setIsLoadingShopsCount] = useState<boolean>(true);
 
   // Formspree / Contact Form State
   const [contactForm, setContactForm] = useState({
@@ -33,9 +34,14 @@ export const LandingPage: React.FC = () => {
   // Récupérer le nombre réel de boutiques enregistrées en BDD via la route publique
   useEffect(() => {
     const getCount = async () => {
-      const count = await fetchPublicShopsCount();
-      if (count > 0) {
+      setIsLoadingShopsCount(true);
+      try {
+        const count = await fetchPublicShopsCount();
         setShopsCount(count);
+      } catch {
+        setShopsCount(0);
+      } finally {
+        setIsLoadingShopsCount(false);
       }
     };
     getCount();
@@ -98,7 +104,7 @@ export const LandingPage: React.FC = () => {
       )}
 
       <main>
-        <Hero shopsCount={shopsCount} onAuthClick={handleAuthClick} />
+        <Hero shopsCount={shopsCount} isLoadingShopsCount={isLoadingShopsCount} onAuthClick={handleAuthClick} />
         <Problem />
         <Features />
         <HowItWorks />

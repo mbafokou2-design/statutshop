@@ -31,6 +31,7 @@ import {
   ChevronRight,
   LogOut,
   Truck,
+  Mail,
 } from 'lucide-react';
 
 export interface WhatsAppStatus {
@@ -299,8 +300,32 @@ export const SettingsPage = () => {
       <div className="card-border rounded-3xl p-5 shadow-panel backdrop-blur-xl space-y-3.5">
         <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Mon compte</h3>
 
-        {/* Statut WhatsApp */}
+        {/* Adresse E-mail */}
         <div className="flex items-center justify-between py-1">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
+              <Mail className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-white">Adresse E-mail</p>
+              <p className="text-[11px] text-slate-400 font-mono mt-0.5">
+                {user?.email || 'Non renseignée'}
+              </p>
+            </div>
+          </div>
+          {user?.email ? (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-whatsapp">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Enregistré
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500">
+              Non défini
+            </span>
+          )}
+        </div>
+
+        {/* Statut WhatsApp */}
+        <div className="flex items-center justify-between py-1 border-t border-slate-850">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-whatsapp/15 text-whatsapp flex items-center justify-center shrink-0">
               <MessageSquare className="w-4.5 h-4.5" />

@@ -7,7 +7,7 @@ import { OfflineState } from '../../components/ui/OfflineState';
 import { ToastContainer } from '../../components/ToastContainer';
 import type { ToastMessage } from '../../components/ToastContainer';
 import {
-  Store, Search, MapPin, Ban, CheckCircle, Trash2, AlertTriangle, Eye
+  Store, Search, MapPin, Ban, CheckCircle, Trash2, AlertTriangle, Eye, Mail, Phone
 } from 'lucide-react';
 
 export const AdminShopsPage: React.FC = () => {
@@ -37,7 +37,8 @@ export const AdminShopsPage: React.FC = () => {
 
   const filteredShops = shops.filter((s) =>
     s.storeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.phone.includes(searchTerm)
+    s.phone.includes(searchTerm) ||
+    (s.email && s.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleToggleStatus = async (shop: AdminShop) => {
@@ -81,7 +82,7 @@ export const AdminShopsPage: React.FC = () => {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Rechercher par nom de boutique ou téléphone..."
+          placeholder="Rechercher par nom de boutique, téléphone ou e-mail..."
           className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
         />
       </div>
@@ -98,9 +99,19 @@ export const AdminShopsPage: React.FC = () => {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h3 className="font-bold text-white text-sm truncate">{shop.storeName}</h3>
-                  <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3 h-3 text-emerald-400" /> {shop.city}, {shop.neighborhood}
-                  </p>
+                  <div className="space-y-0.5 mt-1">
+                    <p className="text-[11px] text-slate-300 flex items-center gap-1 font-mono">
+                      <Phone className="w-3 h-3 text-whatsapp shrink-0" /> {shop.phone}
+                    </p>
+                    {shop.email && (
+                      <p className="text-[11px] text-slate-400 flex items-center gap-1 font-mono truncate">
+                        <Mail className="w-3 h-3 text-sky-400 shrink-0" /> {shop.email}
+                      </p>
+                    )}
+                    <p className="text-[11px] text-slate-400 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-emerald-400 shrink-0" /> {shop.city || 'Non spécifiée'}{shop.neighborhood ? `, ${shop.neighborhood}` : ''}
+                    </p>
+                  </div>
                 </div>
                 {shop.isActive ? (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0">

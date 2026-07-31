@@ -44,7 +44,7 @@ export async function getAllShops(req: AuthRequest, res: Response) {
         : {}),
     },
     select: {
-      id: true, storeName: true, storeSlug: true, phone: true, city: true, neighborhood: true,
+      id: true, storeName: true, storeSlug: true, phone: true, email: true, city: true, neighborhood: true,
       isActive: true, visitCount: true, createdAt: true,
       _count: { select: { orders: true } },
     },

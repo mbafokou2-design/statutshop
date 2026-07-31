@@ -18,8 +18,9 @@ export async function disconnectWhatsApp(): Promise<void> {
 export async function fetchPublicShopsCount(): Promise<number> {
   try {
     const res = await api.get('/shop/info/shops-count');
-    return res.data.count;
-  } catch {
-    return 1200; // fallback
+    return typeof res.data?.count === 'number' ? res.data.count : 0;
+  } catch (error) {
+    console.error('Erreur lors de la récupération du nombre de boutiques:', error);
+    return 0;
   }
 }

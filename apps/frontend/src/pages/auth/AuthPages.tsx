@@ -6,7 +6,6 @@ import { useAuth } from '../../context/AuthContext';
 import { DeliveryDriverApplyPage } from './DeliveryDriverApplyPage';
 import {
   MessageSquare,
-  ShieldCheck,
   Lock,
   Phone,
   Store,
@@ -22,20 +21,25 @@ import {
   X,
   KeyRound,
   Mail,
+  Truck,
 } from 'lucide-react';
 
 type RegisterStep = 'form' | 'telegram_link' | 'otp_verify';
-type ResetStep = 'request' | 'verify';
+type ResetStep = 'request' | 'telegram_link' | 'verify';
 
 type ScreenType = AuthScreen | 'reset_password' | 'driver_apply';
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'StatutShopBot';
 
-export const AuthPages = () => {
+interface AuthPagesProps {
+  defaultScreen?: ScreenType;
+}
+
+export const AuthPages = ({ defaultScreen = 'login' }: AuthPagesProps) => {
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
-  const [screen, setScreen] = useState<ScreenType>('login');
+  const [screen, setScreen] = useState<ScreenType>(defaultScreen);
 
   // 🟢 Email (Resend) par défaut
   const [otpChannel, setOtpChannel] = useState<OtpChannel>('email');
@@ -161,9 +165,13 @@ export const AuthPages = () => {
       }
     } catch (err: any) {
       const data = err.response?.data;
-      if (mode === 'register' && data?.telegramLink) {
+      if (data?.telegramLink) {
         setTelegramLinkFromApi(data.telegramLink);
-        setRegisterStep('telegram_link');
+        if (mode === 'register') {
+          setRegisterStep('telegram_link');
+        } else {
+          setResetStep('telegram_link');
+        }
       } else {
         triggerToastError(data?.error || "Erreur lors de l'envoi du code OTP");
       }
@@ -532,6 +540,59 @@ export const AuthPages = () => {
               </form>
             )}
 
+            {/* ÉTAPE DE LIAISON TELEGRAM POUR RÉINITIALISATION */}
+            {resetStep === 'telegram_link' && (
+              <div className="space-y-4">
+                <button
+                  type="button"
+                  onClick={() => setResetStep('request')}
+                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Modifier mes informations
+                </button>
+
+                <div className="bg-sky-950/40 border border-sky-850 rounded-2xl p-4 text-center space-y-3">
+                  <div className="w-12 h-12 bg-sky-500/20 text-sky-400 rounded-2xl mx-auto flex items-center justify-center ring-4 ring-sky-500/10">
+                    <Bot className="w-6 h-6" />
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-white text-sm">Étape 1/2 : Liez votre compte Telegram</h3>
+                    <p className="text-xs text-sky-200/80 mt-1">
+                      Liez votre numéro avec <span className="font-mono text-sky-300">@{BOT_USERNAME}</span> pour recevoir votre code de réinitialisation.
+                    </p>
+                  </div>
+
+                  <a
+                    href={telegramLinkFromApi || `https://t.me/${BOT_USERNAME}?start=${phone}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs py-3 px-4 rounded-xl transition shadow-lg shadow-sky-950/80 cursor-pointer"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Lier avec @{BOT_USERNAME}</span>
+                    <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                  </a>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => sendOtpRequest('reset_password')}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-2 bg-whatsapp hover:bg-[#2ee071] text-ink-950 font-bold text-sm py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-950/60 disabled:opacity-60 cursor-pointer active:translate-y-px"
+                >
+                  {isLoading ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <span>J'ai démarré le Bot → Obtenir mon code OTP</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
             {/* ÉTAPE 2 : NOUVEAU MOT DE PASSE + CONFIRMATION OTP */}
             {resetStep === 'verify' && (
               <form onSubmit={handleResetPasswordConfirm} className="space-y-4">
@@ -872,6 +933,17 @@ export const AuthPages = () => {
             )}
           </div>
         )}
+
+        <div className="mt-6 pt-4 border-t border-slate-800/80 text-center relative z-10">
+          <button
+            type="button"
+            onClick={() => { setScreen('driver_apply'); resetFlow(); }}
+            className="inline-flex items-center gap-2 text-xs text-amber-400 hover:text-amber-300 transition font-semibold cursor-pointer bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 px-4 py-2.5 rounded-xl w-full justify-center"
+          >
+            <Truck className="w-4 h-4 text-amber-400" />
+            <span>Vous êtes livreur ? Postuler comme livreur partenaire</span>
+          </button>
+        </div>
       </div>
     </div>
   );
