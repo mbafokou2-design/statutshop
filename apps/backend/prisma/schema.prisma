@@ -23,6 +23,7 @@ model User {
   id                  String                  @id @default(uuid())
   role                UserRole                @default(VENDEUR)
   phone               String                  @unique
+  email               String?                 @unique
   passwordHash        String                  @map("password_hash")
   storeName           String                  @map("store_name")
   storeSlug           String                  @unique @map("store_slug")
@@ -111,15 +112,18 @@ model OrderItem {
 }
 
 model OtpCode {
-  id        String   @id @default(uuid())
-  phone     String
-  channel   String   @default("whatsapp") @map("channel")
-  codeHash  String   @map("code_hash")
-  expiresAt DateTime @map("expires_at")
-  attempts  Int      @default(0)
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String    @id @default(uuid())
+  phone        String?
+  email        String?
+  channel      String    @default("whatsapp") @map("channel")
+  codeHash     String    @map("code_hash")
+  expiresAt    DateTime  @map("expires_at")
+  attempts     Int       @default(0)
+  blockedUntil DateTime? @map("blocked_until")
+  createdAt    DateTime  @default(now()) @map("created_at")
 
   @@index([phone])
+  @@index([email])
   @@map("otp_codes")
 }
 

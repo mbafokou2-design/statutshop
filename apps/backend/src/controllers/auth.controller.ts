@@ -1,8 +1,7 @@
-
 import { Request, Response } from 'express';
 import argon2 from 'argon2';
 import { prisma } from '../lib/prisma';
-import { requestOtp, verifyOtp } from '../services/otp.service';
+import { requestOtp, verifyOtp, isEmail } from '../services/otp.service';
 import { signToken } from '../services/jwt.service';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import {
@@ -42,31 +41,76 @@ export async function handleRequestOtp(req: Request, res: Response) {
     return res.status(400).json({ error: parsed.error.errors[0].message });
   }
 
-  // 👈 WhatsApp par défaut si 'channel' n'est pas envoyé
-  const { channel = 'whatsapp', mode } = req.body;
-  const phone = formatPhoneNumber(parsed.data.phone);
+  const { channel = 'email', mode, email, phone, target } = req.body;
 
-  const existingUser = await prisma.user.findUnique({ where: { phone } });
+  let otpTarget = target || email || phone;
 
-  if (mode === 'register' && existingUser) {
-    return res.status(409).json({
-      error: 'Un compte StatutShop existe déjà avec ce numéro. Veuillez vous connecter.'
-    });
+  if (!otpTarget) {
+    return res.status(400).json({ error: "Une adresse e-mail ou un numéro de téléphone est requis." });
   }
 
-  if ((mode === 'login' || mode === 'reset_password') && !existingUser) {
-    return res.status(404).json({
-      error: "Aucun compte StatutShop trouvé pour ce numéro. Veuillez d'abord créer un compte."
-    });
+  if (channel === 'email' || isEmail(otpTarget)) {
+    otpTarget = otpTarget.toLowerCase().trim();
+  } else {
+    otpTarget = formatPhoneNumber(otpTarget);
+  }
+
+  // Vérification de l'existence de l'utilisateur
+  if (isEmail(otpTarget)) {
+    const existingUser = await prisma.user.findUnique({ where: { email: otpTarget } });
+    if (mode === 'register' && existingUser) {
+      return res.status(409).json({
+        error: 'Un compte StatutShop existe déjà avec cette adresse e-mail. Veuillez vous connecter.',
+      });
+    }
+    if ((mode === 'login' || mode === 'reset_password') && !existingUser) {
+      return res.status(404).json({
+        error: "Aucun compte StatutShop trouvé pour cette adresse e-mail.",
+      });
+    }
+  } else {
+    const existingUser = await prisma.user.findUnique({ where: { phone: otpTarget } });
+    if (mode === 'register' && existingUser) {
+      return res.status(409).json({
+        error: 'Un compte StatutShop existe déjà avec ce numéro. Veuillez vous connecter.',
+      });
+    }
+    if ((mode === 'login' || mode === 'reset_password') && !existingUser) {
+      return res.status(404).json({
+        error: "Aucun compte StatutShop trouvé pour ce numéro.",
+      });
+    }
+  }
+
+  // Vérification croisée lors de l'inscription (vérifier téléphone et email en même temps)
+  if (mode === 'register' && phone && email) {
+    const formattedPhone = formatPhoneNumber(phone);
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const existingPhone = await prisma.user.findUnique({ where: { phone: formattedPhone } });
+    if (existingPhone) {
+      return res.status(409).json({ error: 'Un compte StatutShop existe déjà avec ce numéro WhatsApp.' });
+    }
+
+    const existingEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (existingEmail) {
+      return res.status(409).json({ error: 'Un compte StatutShop existe déjà avec cette adresse e-mail.' });
+    }
   }
 
   try {
-    await requestOtp(phone, channel);
-    return res.json({ message: 'Code OTP envoyé sur WhatsApp avec succès' });
+    await requestOtp(otpTarget, channel);
+    const successMsg =
+      channel === 'email'
+        ? `Code OTP envoyé par e-mail à ${otpTarget}`
+        : channel === 'telegram'
+        ? 'Code OTP envoyé sur Telegram'
+        : 'Code OTP envoyé avec succès';
+    return res.json({ message: successMsg });
   } catch (err: any) {
-    if (channel === 'telegram' && err.message?.includes("pas encore lié")) {
+    if (channel === 'telegram' && err.message?.includes('pas encore lié')) {
       const botUsername = process.env.TELEGRAM_BOT_USERNAME || 'StatutShopBot';
-      const cleanPhone = phone.replace('+', '');
+      const cleanPhone = otpTarget.replace('+', '');
       const telegramLink = `https://t.me/${botUsername}?start=${cleanPhone}`;
 
       return res.status(400).json({
@@ -75,7 +119,7 @@ export async function handleRequestOtp(req: Request, res: Response) {
       });
     }
 
-    return res.status(500).json({ error: err.message || "Erreur lors de l'envoi de l'OTP" });
+    return res.status(400).json({ error: err.message || "Erreur lors de l'envoi du code OTP." });
   }
 }
 
@@ -86,15 +130,34 @@ export async function handleVerifyOtp(req: Request, res: Response) {
     return res.status(400).json({ error: parsed.error.errors[0].message });
   }
 
-  const { code, storeName, mode, password } = req.body;
-  const phone = formatPhoneNumber(parsed.data.phone);
+  const { code, storeName, mode, password, phone, email, target } = req.body;
 
-  const isValid = await verifyOtp(phone, code);
-  if (!isValid) {
-    return res.status(401).json({ error: 'Code OTP invalide ou expiré' });
+  let otpTarget = target || email || phone;
+  if (!otpTarget) {
+    return res.status(400).json({ error: 'Identifiant (email ou téléphone) manquant.' });
   }
 
-  let user = await prisma.user.findUnique({ where: { phone } });
+  if (isEmail(otpTarget)) {
+    otpTarget = otpTarget.toLowerCase().trim();
+  } else {
+    otpTarget = formatPhoneNumber(otpTarget);
+  }
+
+  const verification = await verifyOtp(otpTarget, code);
+  if (!verification.success) {
+    return res.status(401).json({ error: verification.message || 'Code OTP invalide ou expiré' });
+  }
+
+  const formattedPhone = phone ? formatPhoneNumber(phone) : isEmail(otpTarget) ? '' : otpTarget;
+  const normalizedEmail = email ? email.toLowerCase().trim() : isEmail(otpTarget) ? otpTarget : null;
+
+  let user = null;
+  if (formattedPhone) {
+    user = await prisma.user.findUnique({ where: { phone: formattedPhone } });
+  }
+  if (!user && normalizedEmail) {
+    user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  }
 
   if (mode === 'register' && user) {
     return res.status(409).json({ error: 'Ce compte existe déjà. Veuillez vous connecter.' });
@@ -104,9 +167,12 @@ export async function handleVerifyOtp(req: Request, res: Response) {
     if (!password) {
       return res.status(400).json({ error: 'Le mot de passe est obligatoire pour créer un compte.' });
     }
+    if (!formattedPhone) {
+      return res.status(400).json({ error: 'Le numéro de téléphone est obligatoire pour créer un compte.' });
+    }
 
     const passwordHash = await argon2.hash(password);
-    const finalStoreName = storeName || `Boutique-${phone.slice(-4)}`;
+    const finalStoreName = storeName || `Boutique-${formattedPhone.slice(-4)}`;
     const baseSlug = slugify(finalStoreName);
 
     let slug = baseSlug;
@@ -118,11 +184,12 @@ export async function handleVerifyOtp(req: Request, res: Response) {
 
     user = await prisma.user.create({
       data: {
-        phone,
+        phone: formattedPhone,
+        email: normalizedEmail,
         passwordHash,
         storeName: finalStoreName,
         storeSlug: slug,
-        whatsappBusinessNum: phone,
+        whatsappBusinessNum: formattedPhone,
         logoUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1785260830/StatutShop_p66wdk.png',
         coverUrl: 'https://res.cloudinary.com/dafs2tmoi/image/upload/v1785260830/StatutShop_p66wdk.png',
         description: 'Bienvenue dans notre boutique ! Découvrez nos produits de qualité.',
@@ -143,6 +210,7 @@ export async function handleVerifyOtp(req: Request, res: Response) {
     user: {
       id: user.id,
       phone: user.phone,
+      email: user.email,
       storeName: user.storeName,
       storeSlug: user.storeSlug,
       role: user.role,
@@ -154,29 +222,37 @@ export async function handleVerifyOtp(req: Request, res: Response) {
 // 🟢 3. RÉINITIALISATION DU MOT DE PASSE
 export async function handleResetPassword(req: Request, res: Response) {
   try {
-    const { phone, code, newPassword } = req.body;
+    const { phone, email, target, code, newPassword } = req.body;
 
-    if (!phone || !code || !newPassword) {
-      return res.status(400).json({ error: 'Tous les champs sont requis.' });
+    let otpTarget = target || email || phone;
+    if (!otpTarget || !code || !newPassword) {
+      return res.status(400).json({ error: 'Tous les champs (identifiant, code OTP et nouveau mot de passe) sont requis.' });
     }
 
-    // verifyOtp va nettoyer et formater le numéro automatiquement grâce à notre mise à jour
-    const isValidOtp = await verifyOtp(phone, code);
-    if (!isValidOtp) {
-      return res.status(400).json({ error: 'Code OTP invalide ou expiré.' });
+    if (isEmail(otpTarget)) {
+      otpTarget = otpTarget.toLowerCase().trim();
+    } else {
+      otpTarget = formatPhoneNumber(otpTarget);
     }
 
-    const cleaned = phone.replace(/\s+/g, '');
-    const formattedPhone = cleaned.startsWith('+') ? cleaned : `+${cleaned}`;
+    const verification = await verifyOtp(otpTarget, code);
+    if (!verification.success) {
+      return res.status(400).json({ error: verification.message || 'Code OTP invalide ou expiré.' });
+    }
 
     const hashedPassword = await argon2.hash(newPassword);
 
-    await prisma.user.update({
-      where: { phone: formattedPhone },
-      data: {
-        passwordHash: hashedPassword // 👈 Utilise passwordHash (ou password_hash selon ton schema.prisma)
-      },
-    });
+    if (isEmail(otpTarget)) {
+      await prisma.user.update({
+        where: { email: otpTarget },
+        data: { passwordHash: hashedPassword },
+      });
+    } else {
+      await prisma.user.update({
+        where: { phone: otpTarget },
+        data: { passwordHash: hashedPassword },
+      });
+    }
 
     return res.json({ message: 'Mot de passe réinitialisé avec succès !' });
   } catch (error) {
@@ -185,7 +261,7 @@ export async function handleResetPassword(req: Request, res: Response) {
   }
 }
 
-// 🟢 4. CONNEXION CLASSIQUE
+// 🟢 4. CONNEXION CLASSIQUE (Uniquement Numéro + Mot de Passe)
 export async function handleLogin(req: Request, res: Response) {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -218,6 +294,7 @@ export async function handleLogin(req: Request, res: Response) {
     user: {
       id: user.id,
       phone: user.phone,
+      email: user.email,
       storeName: user.storeName,
       storeSlug: user.storeSlug,
       role: user.role,
@@ -232,12 +309,18 @@ export async function handleRegister(req: Request, res: Response) {
     return res.status(400).json({ error: parsed.error.errors[0].message });
   }
 
-  const { password, storeName } = parsed.data;
+  const { password, storeName, email } = parsed.data;
   const phone = formatPhoneNumber(parsed.data.phone);
+  const normalizedEmail = email.toLowerCase().trim();
 
-  const existing = await prisma.user.findUnique({ where: { phone } });
-  if (existing) {
-    return res.status(409).json({ error: 'Ce numéro est déjà enregistré' });
+  const existingPhone = await prisma.user.findUnique({ where: { phone } });
+  if (existingPhone) {
+    return res.status(409).json({ error: 'Ce numéro de téléphone est déjà enregistré.' });
+  }
+
+  const existingEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  if (existingEmail) {
+    return res.status(409).json({ error: 'Cette adresse e-mail est déjà enregistrée.' });
   }
 
   const passwordHash = await argon2.hash(password);
@@ -253,6 +336,7 @@ export async function handleRegister(req: Request, res: Response) {
   const user = await prisma.user.create({
     data: {
       phone,
+      email: normalizedEmail,
       passwordHash,
       storeName,
       storeSlug: slug,
@@ -272,6 +356,7 @@ export async function handleRegister(req: Request, res: Response) {
     user: {
       id: user.id,
       phone: user.phone,
+      email: user.email,
       storeName: user.storeName,
       storeSlug: user.storeSlug,
       role: user.role,
@@ -333,8 +418,7 @@ export async function getTelegramStatus(req: AuthRequest, res: Response) {
   });
 }
 
-
-// 🟢 STATUT LIAISON WHATSAPP (Basé uniquement sur l'utilisateur connecté)
+// 🟢 8. STATUT LIAISON WHATSAPP
 export async function getWhatsAppStatus(req: AuthRequest, res: Response) {
   try {
     const userId = req.user!.id;
@@ -356,9 +440,7 @@ export async function getWhatsAppStatus(req: AuthRequest, res: Response) {
     console.error('❌ Erreur getWhatsAppStatus:', error);
     return res.status(500).json({ error: 'Erreur lors de la récupération du statut WhatsApp' });
   }
-
 }
-
 
 // 🟢 9. GET ME — Retourne l'utilisateur connecté avec son rôle à jour
 export const getMe = async (req: AuthRequest, res: Response) => {
@@ -367,12 +449,12 @@ export const getMe = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ error: 'Non authentifié' });
     }
 
-    // req.user.id est garanti non-null depuis le middleware requireAuth
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
       select: {
         id: true,
         phone: true,
+        email: true,
         role: true,
         storeName: true,
         storeSlug: true,
@@ -389,5 +471,3 @@ export const getMe = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ error: 'Erreur serveur' });
   }
 };
-
-

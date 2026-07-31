@@ -21,7 +21,7 @@ import {
   AlertCircle,
   X,
   KeyRound,
-  Truck,
+  Mail,
 } from 'lucide-react';
 
 type RegisterStep = 'form' | 'telegram_link' | 'otp_verify';
@@ -37,11 +37,12 @@ export const AuthPages = () => {
 
   const [screen, setScreen] = useState<ScreenType>('login');
 
-  // 🟢 WhatsApp par défaut
-  const [otpChannel, setOtpChannel] = useState<OtpChannel>('whatsapp');
+  // 🟢 Email (Resend) par défaut
+  const [otpChannel, setOtpChannel] = useState<OtpChannel>('email');
 
   // States Formulaires
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [storeName, setStoreName] = useState('');
@@ -65,7 +66,7 @@ export const AuthPages = () => {
 
   const triggerToastError = (msg: string) => {
     setToastError(msg);
-    setTimeout(() => setToastError(null), 5000);
+    setTimeout(() => setToastError(null), 6000);
   };
 
   const resetFlow = () => {
@@ -86,7 +87,7 @@ export const AuthPages = () => {
     }
   };
 
-  // --- LOGIQUE DE CONNEXION ---
+  // --- LOGIQUE DE CONNEXION (Strictement Numéro + Mot de Passe) ---
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setToastError(null);
@@ -116,14 +117,23 @@ export const AuthPages = () => {
   // --- LOGIQUE D'INSCRIPTION ---
   const handleProceedRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !email.includes('@')) {
+      return triggerToastError('Veuillez saisir une adresse e-mail valide pour recevoir votre code OTP.');
+    }
+    if (!phone || phone.length < 9) {
+      return triggerToastError('Veuillez saisir un numéro WhatsApp valide à 9 chiffres.');
+    }
     await sendOtpRequest('register');
   };
 
   // --- LOGIQUE DEMANDE OTP RESET PASSWORD ---
   const handleRequestResetOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone || phone.length < 9) {
-      return triggerToastError('Veuillez entrer un numéro valide à 9 chiffres.');
+    if (otpChannel === 'email' && (!email || !email.includes('@'))) {
+      return triggerToastError('Veuillez saisir votre adresse e-mail liée au compte.');
+    }
+    if (otpChannel === 'telegram' && (!phone || phone.length < 9)) {
+      return triggerToastError('Veuillez entrer un numéro valide à 9 chiffres pour Telegram.');
     }
     await sendOtpRequest('reset_password');
   };
@@ -131,16 +141,21 @@ export const AuthPages = () => {
   const sendOtpRequest = async (mode: 'register' | 'reset_password') => {
     setIsLoading(true);
     setToastError(null);
+
+    const target = otpChannel === 'email' ? email.trim() : getFullPhone();
+
     try {
       await api.post('/auth/request-otp', {
         phone: getFullPhone(),
+        email: email.trim(),
+        target,
         channel: otpChannel,
         mode,
-        ...(mode === 'register' && { storeName, password })
+        ...(mode === 'register' && { storeName, password }),
       });
 
       if (mode === 'register') {
-        setRegisterStep('otp_verify');
+        setRegisterStep(otpChannel === 'telegram' ? 'telegram_link' : 'otp_verify');
       } else {
         setResetStep('verify');
       }
@@ -162,13 +177,18 @@ export const AuthPages = () => {
     e.preventDefault();
     setToastError(null);
     setIsLoading(true);
+
+    const target = otpChannel === 'email' ? email.trim() : getFullPhone();
+
     try {
       const res = await api.post('/auth/verify-otp', {
         phone: getFullPhone(),
+        email: email.trim(),
+        target,
         code: enteredOtp,
         mode: 'register',
         storeName,
-        password
+        password,
       });
 
       if (res.data.token) {
@@ -199,11 +219,13 @@ export const AuthPages = () => {
     setToastError(null);
     setIsLoading(true);
 
-    try {
-      const fullPhone = getFullPhone();
+    const target = otpChannel === 'email' ? email.trim() : getFullPhone();
 
+    try {
       const res = await api.post('/auth/reset-password', {
-        phone: fullPhone,
+        phone: getFullPhone(),
+        email: email.trim(),
+        target,
         code: enteredOtp,
         newPassword,
       });
@@ -216,13 +238,12 @@ export const AuthPages = () => {
         setUser(res.data.user);
         navigateByRole(res.data.user);
       } else {
-        navigate('/login');
+        setScreen('login');
+        resetFlow();
       }
     } catch (err: any) {
       console.error('❌ Erreur reset password frontend:', err.response?.data);
-      triggerToastError(
-        err.response?.data?.error || 'Code OTP invalide ou expiré.'
-      );
+      triggerToastError(err.response?.data?.error || 'Code OTP invalide ou expiré.');
     } finally {
       setIsLoading(false);
     }
@@ -396,50 +417,29 @@ export const AuthPages = () => {
             {resetStep === 'request' && (
               <form onSubmit={handleRequestResetOtp} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Votre Numéro WhatsApp lié au compte *
-                  </label>
-                  <div className="relative flex items-center">
-                    <Phone className="w-4 h-4 text-whatsapp absolute left-3 pointer-events-none" />
-                    <span className="absolute left-9 text-xs font-mono font-bold text-slate-400 select-none pointer-events-none">
-                      +237
-                    </span>
-                    <input
-                      type="tel"
-                      required
-                      maxLength={9}
-                      placeholder="6XX XX XX XX"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                      className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl pl-20 pr-3 py-3 text-sm text-white font-mono placeholder-slate-650 outline-none transition"
-                    />
-                  </div>
-                </div>
-
-                <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-2">
                     Recevoir le code de réinitialisation via :
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* WhatsApp */}
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    {/* Email (Resend) */}
                     <button
                       type="button"
-                      onClick={() => setOtpChannel('whatsapp')}
-                      className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
-                        otpChannel === 'whatsapp'
-                          ? 'bg-whatsapp/10 border-whatsapp/30 text-white ring-1 ring-whatsapp/10'
-                          : 'bg-slate-950/85 border-slate-900/85 text-slate-450 hover:text-white hover:border-slate-800'
+                      onClick={() => setOtpChannel('email')}
+                      className={`p-3 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
+                        otpChannel === 'email'
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-white ring-1 ring-emerald-500/10'
+                          : 'bg-slate-950/85 border-slate-900/85 text-slate-400 hover:text-white hover:border-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="w-8 h-8 rounded-xl bg-whatsapp/15 text-whatsapp flex items-center justify-center">
-                          <MessageSquare className="w-4 h-4" />
+                        <div className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                          <Mail className="w-3.5 h-3.5" />
                         </div>
-                        {otpChannel === 'whatsapp' && <span className="w-2 h-2 rounded-full bg-whatsapp animate-pulse"></span>}
+                        {otpChannel === 'email' && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>}
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-white">WhatsApp</p>
-                        <p className="text-[10px] text-emerald-300/80 mt-0.5 font-mono">Sur votre application</p>
+                        <p className="text-xs font-semibold text-white">Email (Resend)</p>
+                        <p className="text-[10px] text-emerald-300/80 mt-0.5 font-mono">Disponibilité immédiate</p>
                       </div>
                     </button>
 
@@ -447,25 +447,73 @@ export const AuthPages = () => {
                     <button
                       type="button"
                       onClick={() => setOtpChannel('telegram')}
-                      className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
+                      className={`p-3 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
                         otpChannel === 'telegram'
                           ? 'bg-sky-500/10 border-sky-500/30 text-white ring-1 ring-sky-500/10'
-                          : 'bg-slate-950/85 border-slate-900/85 text-slate-450 hover:text-white hover:border-slate-800'
+                          : 'bg-slate-950/85 border-slate-900/85 text-slate-400 hover:text-white hover:border-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
-                          <Send className="w-4 h-4" />
+                        <div className="w-7 h-7 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
+                          <Send className="w-3.5 h-3.5" />
                         </div>
                         {otpChannel === 'telegram' && <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>}
                       </div>
                       <div>
                         <p className="text-xs font-semibold text-white">Telegram</p>
-                        <p className="text-[10px] text-sky-300/80 mt-0.5 font-mono">Sur le Bot</p>
+                        <p className="text-[10px] text-sky-300/80 mt-0.5 font-mono">Sur le Bot InWork</p>
                       </div>
                     </button>
                   </div>
+
+                  {/* Option WhatsApp Masquée / Désactivée */}
+                  <div className="p-2.5 rounded-xl border border-slate-850 bg-slate-950/50 text-[11px] text-slate-500 flex items-center justify-between opacity-60">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <MessageSquare className="w-3.5 h-3.5 text-slate-600" /> WhatsApp OTP
+                    </span>
+                    <span className="bg-slate-900 text-slate-400 px-2 py-0.5 rounded text-[10px]">Indisponible temporairement</span>
+                  </div>
                 </div>
+
+                {otpChannel === 'email' ? (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                      Adresse Email du compte *
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+                      <input
+                        type="email"
+                        required
+                        placeholder="votre.email@exemple.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl pl-9 pr-3 py-3 text-sm text-white placeholder-slate-650 outline-none transition"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                      Numéro WhatsApp lié *
+                    </label>
+                    <div className="relative flex items-center">
+                      <Phone className="w-4 h-4 text-whatsapp absolute left-3 pointer-events-none" />
+                      <span className="absolute left-9 text-xs font-mono font-bold text-slate-400 select-none pointer-events-none">
+                        +237
+                      </span>
+                      <input
+                        type="tel"
+                        required
+                        maxLength={9}
+                        placeholder="6XX XX XX XX"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                        className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl pl-20 pr-3 py-3 text-sm text-white font-mono placeholder-slate-650 outline-none transition"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <button
                   type="submit"
@@ -488,7 +536,7 @@ export const AuthPages = () => {
             {resetStep === 'verify' && (
               <form onSubmit={handleResetPasswordConfirm} className="space-y-4">
                 <div className="p-3.5 bg-whatsapp/10 border border-whatsapp/20 rounded-xl text-xs text-emerald-300">
-                  Code OTP envoyé avec succès à <span className="font-mono font-bold text-white">+237 {phone}</span>
+                  Code OTP envoyé avec succès à <span className="font-mono font-bold text-white">{otpChannel === 'email' ? email : `+237 ${phone}`}</span>
                 </div>
 
                 <div>
@@ -566,7 +614,24 @@ export const AuthPages = () => {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Numéro WhatsApp *
+                    Adresse Email (Obligatoire pour l'OTP) *
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-emerald-400 absolute left-3 top-3.5" />
+                    <input
+                      type="email"
+                      required
+                      placeholder="votre.email@exemple.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-slate-950/85 border border-slate-900/80 focus:border-whatsapp/60 rounded-xl pl-9 pr-3 py-3 text-sm text-white placeholder-slate-650 outline-none transition"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    Numéro WhatsApp (Obligatoire pour les clients) *
                   </label>
                   <div className="relative flex items-center">
                     <Phone className="w-4 h-4 text-whatsapp absolute left-3 pointer-events-none" />
@@ -606,26 +671,26 @@ export const AuthPages = () => {
                   <label className="block text-xs font-semibold text-slate-300 mb-2">
                     Canal de réception du code OTP :
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* Option WhatsApp Direct */}
+                  <div className="grid grid-cols-2 gap-3 mb-2">
+                    {/* Resend Email */}
                     <button
                       type="button"
-                      onClick={() => setOtpChannel('whatsapp')}
-                      className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
-                        otpChannel === 'whatsapp'
-                          ? 'bg-whatsapp/10 border-whatsapp/30 text-white ring-1 ring-whatsapp/10'
-                          : 'bg-slate-950/85 border-slate-900/85 text-slate-455 hover:text-white hover:border-slate-800'
+                      onClick={() => setOtpChannel('email')}
+                      className={`p-3 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
+                        otpChannel === 'email'
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-white ring-1 ring-emerald-500/10'
+                          : 'bg-slate-950/85 border-slate-900/85 text-slate-400 hover:text-white hover:border-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="w-8 h-8 rounded-xl bg-whatsapp/15 text-whatsapp flex items-center justify-center">
-                          <MessageSquare className="w-4 h-4" />
+                        <div className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                          <Mail className="w-3.5 h-3.5" />
                         </div>
-                        {otpChannel === 'whatsapp' && <span className="w-2 h-2 rounded-full bg-whatsapp animate-pulse"></span>}
+                        {otpChannel === 'email' && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>}
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-white">WhatsApp Direct</p>
-                        <p className="text-[10px] text-emerald-300/80 mt-0.5 font-mono">Instant & Gratuit</p>
+                        <p className="text-xs font-semibold text-white">Resend Email</p>
+                        <p className="text-[10px] text-emerald-300/80 mt-0.5 font-mono">Gratuit & Instantané</p>
                       </div>
                     </button>
 
@@ -633,23 +698,31 @@ export const AuthPages = () => {
                     <button
                       type="button"
                       onClick={() => setOtpChannel('telegram')}
-                      className={`p-3.5 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
+                      className={`p-3 rounded-2xl border text-left transition duration-200 flex flex-col justify-between cursor-pointer ${
                         otpChannel === 'telegram'
                           ? 'bg-sky-500/10 border-sky-500/30 text-white ring-1 ring-sky-500/10'
-                          : 'bg-slate-950/85 border-slate-900/85 text-slate-455 hover:text-white hover:border-slate-800'
+                          : 'bg-slate-950/85 border-slate-900/85 text-slate-400 hover:text-white hover:border-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
-                          <Send className="w-4 h-4" />
+                        <div className="w-7 h-7 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
+                          <Send className="w-3.5 h-3.5" />
                         </div>
                         {otpChannel === 'telegram' && <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>}
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-white">Telegram Bot</p>
-                        <p className="text-[10px] text-sky-300/80 mt-0.5 font-mono">Instant & Gratuit</p>
+                        <p className="text-xs font-semibold text-white">Telegram InWork</p>
+                        <p className="text-[10px] text-sky-300/80 mt-0.5 font-mono">Sur le Bot InWork</p>
                       </div>
                     </button>
+                  </div>
+
+                  {/* Option WhatsApp désactivée au Frontend */}
+                  <div className="p-2.5 rounded-xl border border-slate-850 bg-slate-950/50 text-[11px] text-slate-500 flex items-center justify-between opacity-60">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <MessageSquare className="w-3.5 h-3.5 text-slate-600" /> WhatsApp OTP Direct
+                    </span>
+                    <span className="bg-slate-900 text-slate-400 px-2 py-0.5 rounded text-[10px]">Désactivé (En maintenance)</span>
                   </div>
                 </div>
 
@@ -659,7 +732,7 @@ export const AuthPages = () => {
                   className={`w-full flex items-center justify-center gap-2 font-bold text-sm py-3.5 rounded-xl transition shadow-lg mt-4 text-white disabled:opacity-60 cursor-pointer active:translate-y-px ${
                     otpChannel === 'telegram'
                       ? 'bg-sky-500 hover:bg-sky-400 shadow-sky-950/60'
-                      : 'bg-whatsapp hover:bg-[#2ee071] text-ink-950 shadow-emerald-950/60'
+                      : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950/60'
                   }`}
                 >
                   {isLoading ? (
@@ -671,15 +744,15 @@ export const AuthPages = () => {
                     </>
                   ) : (
                     <>
-                      <span>Recevoir le code WhatsApp</span>
-                      <MessageSquare className="w-4 h-4" />
+                      <span>Recevoir le code par Email</span>
+                      <Mail className="w-4 h-4" />
                     </>
                   )}
                 </button>
               </form>
             )}
 
-            {/* ÉTAPE DE LIAISON TELEGRAM (Uniquement pour INSCRIPTION) */}
+            {/* ÉTAPE DE LIAISON TELEGRAM (Uniquement pour INSCRIPTION TELEGRAM) */}
             {registerStep === 'telegram_link' && (
               <div className="space-y-4">
                 <button
@@ -746,7 +819,7 @@ export const AuthPages = () => {
                 <div className={`p-4 rounded-2xl border space-y-2 ${
                   otpChannel === 'telegram'
                     ? 'bg-sky-500/10 border-sky-500/30 text-sky-200'
-                    : 'bg-whatsapp/10 border-whatsapp/20 text-emerald-200'
+                    : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
                 }`}>
                   <div className="flex items-center gap-2 text-xs font-bold text-white">
                     {otpChannel === 'telegram' ? (
@@ -756,8 +829,8 @@ export const AuthPages = () => {
                       </>
                     ) : (
                       <>
-                        <MessageSquare className="w-4 h-4 text-whatsapp" />
-                        <span>Code envoyé sur WhatsApp</span>
+                        <Mail className="w-4 h-4 text-emerald-400" />
+                        <span>Code envoyé à {email}</span>
                       </>
                     )}
                   </div>
@@ -799,31 +872,6 @@ export const AuthPages = () => {
             )}
           </div>
         )}
-
-        {/* Footer info */}
-        <div className="mt-6 pt-5 border-t border-slate-800/80 space-y-3.5 text-[11px] text-slate-400 relative z-10">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-whatsapp shrink-0" />
-            <span>Sécurité renforcée par Telegram Bot &amp; SMS OTP.</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-whatsapp shrink-0" />
-            <span>Redirection directe vers votre numéro WhatsApp personnel.</span>
-          </div>
-
-          {/* Lien Livreur */}
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={() => { setScreen('driver_apply'); resetFlow(); }}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-400 hover:text-amber-300 text-xs font-bold transition group cursor-pointer"
-            >
-              <Truck className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              <span>Je veux devenir Livreur Partenaire</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

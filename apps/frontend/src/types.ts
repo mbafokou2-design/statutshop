@@ -1,12 +1,13 @@
 export type AuthScreen = 'login' | 'register';
 // 🟢 Remplacement de 'sms' par 'whatsapp'
-export type OtpChannel = 'telegram' | 'whatsapp';
+export type OtpChannel = 'telegram' | 'whatsapp' | 'email';
 
 // ❌ 'StoreSettings' (version incomplète) supprimé d'ici pour éviter les conflits de types
 
 export interface User {
   id: string;
   phone: string;
+  email?: string;
   storeName: string;
   storeSlug: string;
   role: UserRole;
