@@ -3,7 +3,8 @@ import type { Product, StoreSettings } from '../../types';
 import { CATEGORY_LABELS } from '../../types';
 import { formatCurrency } from '../../utils';
 import { ProductDetailModal } from './ProductDetailModal';
-import { MessageSquare, Search, MapPin, ShieldCheck, ShoppingBag } from 'lucide-react';
+import { Search, MapPin, ShieldCheck, ShoppingBag } from 'lucide-react';
+import { WhatsAppIcon } from '../../components/ui/WhatsAppIcon';
 
 interface ClientStorefrontProps {
   storeSettings: StoreSettings;
@@ -80,7 +81,7 @@ export const ClientStorefront = ({ storeSettings, products, onNewOrderFromClient
             onClick={handleOpenDirectWhatsAppStore}
             className="w-full sm:w-auto flex items-center justify-center gap-2 bg-whatsapp hover:bg-[#2ee071] text-ink-950 font-bold text-xs px-5 py-3 rounded-xl transition shadow-lg shadow-emerald-950/60 shrink-0 cursor-pointer active:translate-y-px"
           >
-            <MessageSquare className="w-4 h-4" />
+            <WhatsAppIcon className="w-4.5 h-4.5" />
             <span>Discuter sur WhatsApp</span>
           </button>
         </div>
@@ -170,7 +171,7 @@ export const ClientStorefront = ({ storeSettings, products, onNewOrderFromClient
                           : 'bg-slate-800/60 text-slate-500 cursor-not-allowed'
                       }`}
                     >
-                      <MessageSquare className="w-3.5 h-3.5" />
+                      <WhatsAppIcon className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">Commander</span>
                     </button>
                   </div>

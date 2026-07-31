@@ -12,8 +12,9 @@ import { ToastContainer } from '../../components/ToastContainer';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../lib/api';
 import {
-  Store, MessageSquare, MapPin, User, Phone, Truck, ShieldCheck, Sparkles, ArrowLeft, PackageX
+  Store,  MapPin, User, Phone, Truck, ShieldCheck, Sparkles, ArrowLeft, PackageX
 } from 'lucide-react';
+import { WhatsAppIcon } from '../../components/ui/WhatsAppIcon';
 
 const DELIVERY_OPTIONS = [
   { value: 'Client paye le taxi à la livraison', label: "🚕 Je paierai les frais de taxi à l'arrivée" },
@@ -233,7 +234,7 @@ export const SingleProductPage = () => {
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-1.5 bg-whatsapp hover:bg-[#2ee071] text-ink-950 text-xs font-bold py-3 rounded-xl transition cursor-pointer"
                 >
-                  <MessageSquare className="w-3.5 h-3.5" />
+                  <WhatsAppIcon className="w-4 h-4" />
                   <span>Contacter sur WhatsApp</span>
                 </a>
                 <button
@@ -349,7 +350,7 @@ export const SingleProductPage = () => {
               disabled={isSubmitting || !product.isAvailable}
               className="w-full flex items-center justify-center gap-2 bg-whatsapp hover:bg-[#2ee071] text-ink-950 font-bold text-sm py-3.5 rounded-xl transition shadow-lg shadow-emerald-950/60 cursor-pointer active:translate-y-px disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <MessageSquare className="w-5 h-5" />
+              <WhatsAppIcon className="w-5 h-5" />
               <span>
                 {isSubmitting ? 'Envoi...' : !product.isAvailable ? 'Produit indisponible' : 'Commander via WhatsApp'}
               </span>

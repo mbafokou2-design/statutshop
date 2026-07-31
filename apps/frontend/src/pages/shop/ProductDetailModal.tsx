@@ -3,7 +3,8 @@ import type { FormEvent } from 'react';
 import type { Product, StoreSettings } from '../../types';
 import { CATEGORY_LABELS } from '../../types';
 import { formatCurrency, generateWhatsAppLink } from '../../utils';
-import { X, MessageSquare, MapPin, User, Phone, Truck, ShieldCheck, Sparkles } from 'lucide-react';
+import { X, MapPin, User, Phone, Truck, ShieldCheck, Sparkles } from 'lucide-react';
+import { WhatsAppIcon } from '../../components/ui/WhatsAppIcon';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -210,7 +211,7 @@ export const ProductDetailModal = ({
               disabled={isSubmitting}
               className="w-full flex items-center justify-center gap-2 bg-whatsapp hover:bg-[#2ee071] text-ink-950 font-bold text-sm py-3.5 rounded-xl transition shadow-lg shadow-emerald-950/60 cursor-pointer active:translate-y-px disabled:opacity-60"
             >
-              <MessageSquare className="w-5 h-5" />
+              <WhatsAppIcon className="w-5 h-5" />
               <span>{isSubmitting ? 'Envoi...' : 'Commander via WhatsApp'}</span>
             </button>
           </form>
