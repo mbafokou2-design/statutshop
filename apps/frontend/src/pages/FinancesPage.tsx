@@ -35,15 +35,16 @@ export const FinancesPage = () => {
 
   const handleExportCsv = () => {
     if (!data) return;
-    const header = 'Commande,Client,Produit,Prix Client,Grossiste,Livraison,Profit Net\n';
+    const header = 'Numéro Commande,Client,Produit,Chiffre d\'affaires (FCFA),Prix Grossiste (FCFA),Livraison (FCFA),Profit Net (FCFA),Date\n';
     const rows = data.ledger.map((e) =>
-      `${e.orderNumber},${e.customerName},"${e.productTitle}",${e.totalAmount},${e.wholesaleCost},${e.deliveryFee},${e.netProfit}`
+      `"${e.orderNumber}","${e.customerName}","${e.productTitle.replace(/"/g, '""')}",${e.totalAmount},${e.wholesaleCost},${e.deliveryFee},${e.netProfit},"${new Date(e.createdAt).toLocaleDateString('fr-FR')}"`
     ).join('\n');
-    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+    const bom = '\uFEFF';
+    const blob = new Blob([bom + header + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `bilan-${period}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `bilan-financier-statutshop-${period}-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };

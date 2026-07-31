@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { Product, StoreSettings } from '../../types';
 import { CATEGORY_LABELS } from '../../types';
-import { formatCurrency, generateWhatsAppLink } from '../../utils';
+import { formatCurrency, generateWhatsAppLink, updateMetaTags } from '../../utils';
 import { fetchPublicProduct, submitPublicOrder } from '../../services/publicShop.service';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { OfflineState } from '../../components/ui/OfflineState';
@@ -59,6 +59,18 @@ export const SingleProductPage = () => {
   };
 
   useEffect(() => { load(); }, [storeSlug, productSlug]);
+
+  // Définir dynamiquement les balises Meta SEO / Open Graph Produit (Aperçu WhatsApp & Telegram)
+  useEffect(() => {
+    if (product && vendeur) {
+      updateMetaTags({
+        title: `${product.title} (${formatCurrency(product.priceSelling)}) • ${vendeur.storeName}`,
+        description: product.description || `Achetez ${product.title} à ${formatCurrency(product.priceSelling)} chez ${vendeur.storeName} sur StatutShop.`,
+        image: product.imageUrl || vendeur.logoUrl,
+        url: window.location.href,
+      });
+    }
+  }, [product, vendeur]);
 
   // Enregistrement de la visite de boutique
   useEffect(() => {

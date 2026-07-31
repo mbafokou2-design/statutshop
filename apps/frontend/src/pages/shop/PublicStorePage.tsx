@@ -10,6 +10,8 @@ import { fetchPublicStore, submitPublicOrder } from '../../services/publicShop.s
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../lib/api';
 
+import { updateMetaTags } from '../../utils';
+
 export const PublicStorePage = () => {
   const { storeSlug } = useParams<{ storeSlug: string }>();
   const { user } = useAuth();
@@ -41,6 +43,18 @@ export const PublicStorePage = () => {
   useEffect(() => { 
     load(); 
   }, [storeSlug]);
+
+  // Définir dynamiquement les balises Meta SEO / Open Graph (Aperçu WhatsApp & Telegram)
+  useEffect(() => {
+    if (vendeur) {
+      updateMetaTags({
+        title: `${vendeur.storeName} • Boutique StatutShop`,
+        description: vendeur.description || `Découvrez les produits de ${vendeur.storeName} et commandez directement sur WhatsApp.`,
+        image: vendeur.logoUrl || vendeur.coverUrl,
+        url: window.location.href,
+      });
+    }
+  }, [vendeur]);
 
 // Enregistrement de la visite avec filtres anti-spam
   useEffect(() => {
