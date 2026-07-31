@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Lock, Save } from 'lucide-react';
 import { changePassword } from '../../services/settings.service';
 
@@ -17,6 +18,27 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Lock body scroll using position fixed while modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -41,10 +63,15 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
-      <div className="bg-slate-900 border border-slate-800 rounded-t-2xl sm:rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+  return createPortal(
+    <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-[100dvh] z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
+      <div
+        style={{ touchAction: 'pan-y' }}
+        className="relative bg-slate-900 border border-slate-800 rounded-t-2xl sm:rounded-2xl w-full max-w-sm shadow-2xl max-h-[85dvh] sm:max-h-[90dvh] overflow-y-auto overscroll-contain"
+      >
+
+        {/* Sticky header */}
+        <div className="sticky top-0 z-10 bg-slate-900 px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Lock className="w-4 h-4 text-emerald-400" /> Changer le mot de passe
           </h3>
@@ -53,7 +80,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-3">
+        <form onSubmit={handleSubmit} className="p-5 space-y-3 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
           {hasExistingPassword && (
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">Mot de passe actuel</label>
@@ -90,6 +117,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -62,6 +62,27 @@ export const OrdersPage = () => {
 
   useEffect(() => { load(); }, []);
 
+  // Lock body scroll using position fixed when the order detail modal is open
+  useEffect(() => {
+    if (selectedOrder) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [selectedOrder]);
+
   const handleUpdateStatus = async (id: string, newStatus: BackendOrderStatus) => {
     setUpdatingId(id);
     try {
@@ -260,74 +281,87 @@ export const OrdersPage = () => {
         </div>
       )}
 
-      {/* Modal détails */}
-      {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-ink-950/85 backdrop-blur-md">
-          <div className="card-border rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-panel p-5.5 space-y-5 max-h-[90vh] overflow-y-auto relative z-10">
-            <div className="dotted-grid absolute inset-0 opacity-10 pointer-events-none" />
+{/* Modal détails */}
+{selectedOrder && (
+  <div
+    onClick={() => setSelectedOrder(null)}
+    className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-[100dvh] z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-ink-950/85 backdrop-blur-md animate-fade-in"
+  >
+    <div
+      style={{ touchAction: 'pan-y' }}
+      onClick={(e) => e.stopPropagation()}
+      className="card-border rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-panel max-h-[85dvh] sm:max-h-[90dvh] overflow-y-auto overscroll-contain relative animate-slide-up sm:animate-none"
+    >
+      <div className="dotted-grid absolute inset-0 opacity-10 pointer-events-none" />
 
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3.5 relative z-10">
-              <h3 className="text-sm font-bold text-white">
-                Commande #{selectedOrder.id.slice(0, 8).toUpperCase()}
-              </h3>
-              <button
-                onClick={() => setSelectedOrder(null)}
-                className="p-1.5 text-slate-400 hover:text-white bg-slate-900/60 border border-slate-800/80 rounded-lg cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
+      {/* petite poignée visuelle pour indiquer que c'est un bottom sheet (mobile only) */}
+      <div className="sm:hidden flex justify-center pt-2.5 pb-1">
+        <div className="w-10 h-1 rounded-full bg-slate-700" />
+      </div>
+
+      {/* Sticky header */}
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800/80 px-5 py-4 bg-ink-900/95 backdrop-blur-md">
+        <h3 className="text-sm font-bold text-white">
+          Commande #{selectedOrder.id.slice(0, 8).toUpperCase()}
+        </h3>
+        <button
+          onClick={() => setSelectedOrder(null)}
+          className="p-1.5 text-slate-400 hover:text-white bg-slate-900/60 border border-slate-800/80 rounded-lg cursor-pointer"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="p-5 space-y-3.5 relative z-10 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+        {selectedOrder.items.map((item) => (
+          <div key={item.id} className="flex items-center gap-3 bg-slate-950/80 p-3.5 rounded-xl border border-slate-850">
+            <img src={item.product.imageUrl || 'https://images.unsplash.com/photo-1553531384-cc64ac80f931?q=80&w=100&auto=format&fit=crop'} alt={item.product.title} className="w-12 h-12 rounded-lg object-cover" />
+            <div>
+              <div className="font-bold text-white">{item.product.title}</div>
+              <div className="text-slate-405 mt-0.5">Quantité: {item.quantity} × {formatCurrency(Number(item.unitPrice))}</div>
             </div>
+          </div>
+        ))}
 
-            <div className="space-y-3.5 text-xs relative z-10">
-              {selectedOrder.items.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 bg-slate-950/80 p-3.5 rounded-xl border border-slate-850">
-                  <img src={item.product.imageUrl || 'https://images.unsplash.com/photo-1553531384-cc64ac80f931?q=80&w=100&auto=format&fit=crop'} alt={item.product.title} className="w-12 h-12 rounded-lg object-cover" />
-                  <div>
-                    <div className="font-bold text-white">{item.product.title}</div>
-                    <div className="text-slate-405 mt-0.5">Quantité: {item.quantity} × {formatCurrency(Number(item.unitPrice))}</div>
-                  </div>
-                </div>
-              ))}
+        <div className="space-y-2 bg-slate-950/80 p-3.5 rounded-xl border border-slate-850">
+          <div className="text-[10px] font-bold text-whatsapp uppercase tracking-wider font-mono">Informations Client</div>
+          <div className="text-slate-205">Nom: <strong className="text-white">{selectedOrder.customerName}</strong></div>
+          <div className="text-slate-205">Téléphone: <strong className="text-white">{selectedOrder.customerPhone}</strong></div>
+          {selectedOrder.deliveryAddress && (
+            <div className="text-slate-205">Adresse: <strong className="text-white">{selectedOrder.deliveryAddress}</strong></div>
+          )}
+        </div>
 
-              <div className="space-y-2 bg-slate-950/80 p-3.5 rounded-xl border border-slate-850">
-                <div className="text-[10px] font-bold text-whatsapp uppercase tracking-wider font-mono">Informations Client</div>
-                <div className="text-slate-205">Nom: <strong className="text-white">{selectedOrder.customerName}</strong></div>
-                <div className="text-slate-205">Téléphone: <strong className="text-white">{selectedOrder.customerPhone}</strong></div>
-                {selectedOrder.deliveryAddress && (
-                  <div className="text-slate-205">Adresse: <strong className="text-white">{selectedOrder.deliveryAddress}</strong></div>
-                )}
-              </div>
-
-              <div className="space-y-2 bg-slate-950/80 p-3.5 rounded-xl border border-slate-850">
-                <div className="text-[10px] font-bold text-sky-400 uppercase tracking-wider font-mono">Récapitulatif Financier</div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Total Client:</span>
-                  <span className="font-bold text-white">{formatCurrency(Number(selectedOrder.totalAmount))}</span>
-                </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>Coût Grossiste:</span>
-                  <span className="font-mono">
-                    {formatCurrency(selectedOrder.items.reduce((s, i) => s + i.quantity * Number(i.product.priceWholesale), 0))}
-                  </span>
-                </div>
-                <div className="border-t border-slate-800/80 pt-2.5 flex justify-between text-sm font-bold text-whatsapp">
-                  <span>Bénéfice Net:</span>
-                  <span>
-                    +{formatCurrency(Number(selectedOrder.totalAmount) - selectedOrder.items.reduce((s, i) => s + i.quantity * Number(i.product.priceWholesale), 0))}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setSelectedOrder(null)}
-              className="w-full bg-slate-800 hover:bg-slate-750 text-white font-bold py-3 rounded-xl text-xs cursor-pointer duration-200"
-            >
-              Fermer
-            </button>
+        <div className="space-y-2 bg-slate-950/80 p-3.5 rounded-xl border border-slate-850">
+          <div className="text-[10px] font-bold text-sky-400 uppercase tracking-wider font-mono">Récapitulatif Financier</div>
+          <div className="flex justify-between text-slate-300">
+            <span>Total Client:</span>
+            <span className="font-bold text-white">{formatCurrency(Number(selectedOrder.totalAmount))}</span>
+          </div>
+          <div className="flex justify-between text-slate-400">
+            <span>Coût Grossiste:</span>
+            <span className="font-mono">
+              {formatCurrency(selectedOrder.items.reduce((s, i) => s + i.quantity * Number(i.product.priceWholesale), 0))}
+            </span>
+          </div>
+          <div className="border-t border-slate-800/80 pt-2.5 flex justify-between text-sm font-bold text-whatsapp">
+            <span>Bénéfice Net:</span>
+            <span>
+              +{formatCurrency(Number(selectedOrder.totalAmount) - selectedOrder.items.reduce((s, i) => s + i.quantity * Number(i.product.priceWholesale), 0))}
+            </span>
           </div>
         </div>
-      )}
+
+        <button
+          onClick={() => setSelectedOrder(null)}
+          className="w-full bg-slate-800 hover:bg-slate-750 text-white font-bold py-3 rounded-xl text-xs cursor-pointer duration-200"
+        >
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       <ToastContainer toasts={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
     </div>

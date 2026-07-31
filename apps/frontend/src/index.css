@@ -11,10 +11,33 @@
   --color-whatsapp: #25d366;
   --color-whatsapp-dark: #1ea952;
   --color-whatsapp-soft: rgba(37, 211, 102, 0.12);
-  
+
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Inter Tight', 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --animate-fade-in: fadeIn 0.2s ease-out;
+  --animate-slide-up: slideUp 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
 }
 
 :root {
@@ -34,6 +57,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* iOS momentum scrolling for all scrollable areas (modals, panels, etc.) */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+
 ::selection {
   background: rgba(37, 211, 102, 0.28);
   color: #ffffff;
@@ -41,20 +70,16 @@ body {
 
 /* Thin hairline grid used behind a few sections */
 .hairline-grid {
-  background-image: linear-gradient(
-      to right,
+  background-image: linear-gradient(to right,
       rgba(148, 163, 184, 0.06) 1px,
-      transparent 1px
-    ),
+      transparent 1px),
     linear-gradient(to bottom, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 
 .dotted-grid {
-  background-image: radial-gradient(
-    rgba(148, 163, 184, 0.14) 1px,
-    transparent 1px
-  );
+  background-image: radial-gradient(rgba(148, 163, 184, 0.14) 1px,
+      transparent 1px);
   background-size: 22px 22px;
 }
 

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import type { FormEvent } from 'react';
 import type { Product, StoreSettings } from '../../types';
 import { CATEGORY_LABELS } from '../../types';
@@ -36,6 +37,27 @@ export const ProductDetailModal = ({
   const [deliveryOption, setDeliveryOption] = useState(DELIVERY_OPTIONS[0].value);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Lock body scroll using position fixed while modal is open
+  useEffect(() => {
+    if (isOpen && product) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isOpen, product]);
+
   if (!isOpen || !product) return null;
 
   const handleOrderWhatsApp = async (e: FormEvent) => {
@@ -59,9 +81,12 @@ export const ProductDetailModal = ({
 
   const totalPrice = product.priceSelling * quantity;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-      <div className="card-border rounded-t-3xl sm:rounded-3xl w-full max-w-2xl shadow-panel overflow-hidden my-0 sm:my-6 max-h-[95vh] overflow-y-auto relative">
+  return createPortal(
+    <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-[100dvh] z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-md">
+      <div
+        style={{ touchAction: 'pan-y' }}
+        className="card-border rounded-t-3xl sm:rounded-3xl w-full max-w-2xl shadow-panel max-h-[88dvh] sm:max-h-[92dvh] overflow-y-auto overscroll-contain relative my-0 sm:my-6"
+      >
         <div className="dotted-grid absolute inset-0 opacity-10 pointer-events-none" />
 
         <div className="relative h-56 sm:h-72 bg-slate-950 overflow-hidden">
@@ -97,7 +122,7 @@ export const ProductDetailModal = ({
           </div>
         </div>
 
-        <div className="p-4 sm:p-6 space-y-5 relative z-10">
+        <div className="p-4 sm:p-6 space-y-5 relative z-10 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
           {product.description && (
             <p className="text-xs sm:text-sm text-slate-305 leading-relaxed bg-slate-950/40 p-4 rounded-2xl border border-slate-800/80">
               {product.description}
@@ -217,6 +242,7 @@ export const ProductDetailModal = ({
           </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

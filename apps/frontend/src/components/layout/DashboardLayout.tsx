@@ -53,7 +53,7 @@ export const DashboardLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950 text-slate-205 pb-24 sm:pb-0 relative overflow-hidden">
+    <div className="min-h-screen bg-ink-950 text-slate-205 pb-24 sm:pb-0 relative overflow-x-hidden">
       {/* Background decorations */}
       <div className="hairline-grid pointer-events-none absolute inset-0 h-[450px] w-full [mask-image:radial-gradient(50%_50%_at_50%_0%,#000,transparent)] opacity-40" />
 

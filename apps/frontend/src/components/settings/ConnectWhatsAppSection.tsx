@@ -37,6 +37,27 @@ export const ConnectWhatsAppSection: React.FC<ConnectWhatsAppSectionProps> = ({ 
 
   useEffect(() => { loadStatus(); }, []);
 
+  // Lock body scroll using position fixed while the connection modal is open
+  useEffect(() => {
+    if (showModal) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [showModal]);
+
   // Poll le statut toutes les 4s pendant qu'on attend la confirmation de liaison
   useEffect(() => {
     if (step !== 'show_code') return;
@@ -149,9 +170,14 @@ export const ConnectWhatsAppSection: React.FC<ConnectWhatsAppSectionProps> = ({ 
 
       {/* Modal de connexion */}
       {showModal && (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto">
-            <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between sticky top-0 bg-slate-900 z-10">
+        <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-[100dvh] z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div
+            style={{ touchAction: 'pan-y' }}
+            className="relative bg-slate-900 border border-slate-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl max-h-[88dvh] sm:max-h-[92dvh] overflow-y-auto overscroll-contain"
+          >
+
+            {/* Sticky header */}
+            <div className="sticky top-0 z-10 bg-slate-900 px-5 py-4 border-b border-slate-800 flex items-center justify-between">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-emerald-400" /> Connecter WhatsApp
               </h3>
@@ -163,7 +189,7 @@ export const ConnectWhatsAppSection: React.FC<ConnectWhatsAppSectionProps> = ({ 
               </button>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="p-5 space-y-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
               {step === 'enter_phone' && (
                 <form onSubmit={handleConnect} className="space-y-4">
                   <div>

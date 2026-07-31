@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import type { Product, ProductCategory } from '../../types';
 import { CATEGORY_LABELS } from '../../types';
 import type { ProductFormData } from '../../services/product.service';
@@ -53,6 +54,27 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
     }
   }, [editingProduct, isOpen]);
 
+  // Lock body scroll using position fixed while modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const calculatedMargin = priceSelling - priceWholesale;
@@ -91,10 +113,15 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-t-2xl sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden my-0 sm:my-8 max-h-[92vh] overflow-y-auto">
-        <div className="px-4 sm:px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/50 sticky top-0 z-10">
+  return createPortal(
+    <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-[100dvh] z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
+      <div
+        style={{ touchAction: 'pan-y' }}
+        className="relative bg-slate-900 border border-slate-800 rounded-t-2xl sm:rounded-2xl w-full max-w-lg shadow-2xl max-h-[88dvh] sm:max-h-[92dvh] overflow-y-auto overscroll-contain sm:my-8"
+      >
+
+        {/* Sticky header — works inside overflow-y-auto without flex-col */}
+        <div className="sticky top-0 z-10 bg-slate-900 px-4 sm:px-6 py-4 border-b border-slate-800 flex items-center justify-between">
           <div>
             <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-emerald-400" />
@@ -107,7 +134,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">Photo du produit</label>
             <div className="flex items-center gap-3">
@@ -239,6 +266,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -491,8 +491,8 @@ export const AdminDeliveryPartnersPage: React.FC = () => {
 
       {/* ===================== MODAL DETAIL CANDIDAT ===================== */}
       {selectedCandidate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-[100dvh] z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div style={{ touchAction: 'pan-y' }} className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-2xl space-y-5 max-h-[85dvh] sm:max-h-[90dvh] overflow-y-auto overscroll-contain">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
@@ -622,8 +622,8 @@ export const AdminDeliveryPartnersPage: React.FC = () => {
 
       {/* ===================== MODAL REJET / ANNULATION MOTIF ===================== */}
       {rejectingCandidate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-[100dvh] z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div style={{ touchAction: 'pan-y' }} className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-2xl space-y-4 max-h-[85dvh] sm:max-h-[90dvh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-base font-black text-white">Annuler / Refuser la candidature</h3>
               <button
@@ -676,9 +676,9 @@ export const AdminDeliveryPartnersPage: React.FC = () => {
       {fullImageViewUrl && (
         <div
           onClick={() => setFullImageViewUrl(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md cursor-pointer"
+          className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-[100dvh] z-[9999] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md cursor-pointer"
         >
-          <div className="relative max-w-3xl max-h-[85vh] rounded-2xl overflow-hidden border border-slate-700 shadow-2xl">
+          <div className="relative max-w-3xl max-h-[85dvh] rounded-2xl overflow-hidden border border-slate-700 shadow-2xl">
             <img src={fullImageViewUrl} alt="Aperçu grand format" className="w-full h-full object-contain" />
             <button
               onClick={() => setFullImageViewUrl(null)}
